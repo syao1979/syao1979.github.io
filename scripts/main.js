@@ -9,6 +9,7 @@
 	var graphics
 	var renderer
 	var layout
+	var animation = false
 	
 	var nodeSize = 24
 	
@@ -136,6 +137,7 @@
     jHist.prototype = {
         //constructor: jHist,
 		init_display : function (gid){
+			console.log(gid)
 			graphics = Viva.Graph.View.svgGraphics(); 
 			
 			graphics.node(showNode).placeNode(placeNode).link(showLink).placeLink(placeLink);
@@ -147,13 +149,18 @@
 			   gravity : VIEW_PARAM['gravity']
 			});
 		
+			let domObj = window.document.body
+			if (gid != undefined) {
+				domObj = document.getElementById(gid)
+			}
 			renderer = Viva.Graph.View.renderer(graph, {
 					layout    : layout,
 					graphics  : graphics,
-					container : document.getElementById(gid)	//document.getElementById('graphContainer')
+					container : domObj
 			});
 		
 			renderer.run();
+			animation = true
 			//renderer.pause()
 		},
 		
@@ -177,6 +184,10 @@
 		graph : function() { return graph},
 		renderer : function(){ return renderer},
 		layout : function() { return layout},
+		
+		isrunning : function() { return animation; },
+		pause : function() { animation = false; renderer.pause(); },
+		resume : function() { animation = true; renderer.resume(); }
 	}
 	
     // Create a jMol object and put it i global scope
