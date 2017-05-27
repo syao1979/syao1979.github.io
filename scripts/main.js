@@ -16,7 +16,7 @@
 		"nodeSize" : 15,
 		"springLength" : 80,        // view layout setting
 		"springCoeff" : 0.0028,     // same
-		"gravity" : -18,           // same
+		"gravity" : -22,           // same
 		"theta" : 0.8,              // same
 		"dragCoeff" : 0.02,         // same
 		"timeStep" : 20,            // same
@@ -50,15 +50,29 @@
 	//-- node display customization
 	function showNode(node) {
 		let imgURL = '/images/man.png'
-		if (node.data.gender == 'f') {
-			imgURL = '/images/woman.png'
+		if (node.data.type == "di-wang") {
+			if (node.data.gender == 'f') {
+				imgURL = '/images/nv-wang.png'
+			} else {
+				imgURL = '/images/di-wang.png'
+			}
+		} else {
+			if (node.data.gender == 'f') {
+				imgURL = '/images/woman.png'
+			}
 		}
+		
 		if (node.data.image && node.data.image != "") {
 			imgURL = node.data.image
 		}
+		
 		// This time it's a group of elements: http://www.w3.org/TR/SVG/struct.html#Groups
+		var ntxt = node.data.id
+		if (node.data.name) {
+			ntxt = node.data.name
+		}
 		var ui = Viva.Graph.svg('g'), // Create SVG text element with user name as content
-			svgText = Viva.Graph.svg('text').attr('y', '-4px').text(node.data.name),
+			svgText = Viva.Graph.svg('text').attr('y', '-4px').text(ntxt),
 			img = Viva.Graph.svg('image').attr('width', nodeSize).attr('height', nodeSize).link(imgURL);
 
 		ui.append(svgText);

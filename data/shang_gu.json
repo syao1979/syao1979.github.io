@@ -1,40 +1,58 @@
  {
 	"nodes" : [
-		{"id": "shao-dian", "name": "少典"},
-		{"id": "fu-bao", "name": "附宝", "gender": "f"},
+		{"id": "少典"},
+		{"id": "附宝", "gender": "f"},
 		
-		{"id": "huang-di", "name": "黄帝", "image":"/images/huang-di.jpg", "ref":"http://baike.baidu.com/item/%E9%BB%84%E5%B8%9D/118887?fr=aladdin"},
-		{"id": "lei-zhu", "name": "嫘祖", "gender":"f"},
-		{"id": "zhuanxu-di", "name": ["颛顼", "高阳"]},
+		{"id": "黄帝", "type": "di-wang", "ref":"http://baike.baidu.com/item/%E9%BB%84%E5%B8%9D/118887?fr=aladdin"},
+		{"id": "嫘祖", "gender":"f"},
+		{"id": "颛顼", "name": ["颛顼", "高阳"], "type": "di-wang"},
 		
-		{"id": "xuan-xiao", "name": "玄嚣"},
-		{"id": "chang-yi", "name": "昌意"},
-		{"id": "chang-pu", "name": "昌仆", "gender": "f"},
+		{"id": "玄嚣"},
+		{"id": "昌意"},
+		{"id": "昌仆", "gender": "f"},
 
-		{"id": "di-ku", "name": "帝喾"},
-		{"id": "di-yao", "name": "尧"},
-		{"id": "di-shun", "name": "舜"},
-		{"id": "da-yu", "name": "YU"}
+		{"id": "蟜极"},
+		
+	
+		{"id": "帝喾", "name": ["帝喾", "高辛"], "type": "di-wang"},
+		{"id": "陈锋氏", "gender": "f"},
+		{"id": "娵訾氏", "gender": "f"},
+		{"id": "帝挚", "type": "di-wang"},
+		
+		{"id": "尧", "name": ["尧", "放勋"], "type": "di-wang"},
+		{"id": "舜", "type": "di-wang"},
+		{"id": "禹", "type": "di-wang"}
 	],
 	"links" : [
-		{"from" : "shao-dian", "to" : "huang-di", "relation" : "son"},
-		{"from" : "fu-bao", "to" : "huang-di", "relation" : "son", "type" : "noshow"},
-		{"from" : "shao-dian", "to" : "fu-bao", "relation" : "wife"},
-		{"from" : "huang-di", "to" : "lei-zhu", "relation" : "wife"},
+		{"from" : "少典", "to" : "黄帝", "relation" : "son"},
+		{"from" : "附宝", "to" : "黄帝", "relation" : "son", "type" : "noshow"},
+		{"from" : "少典", "to" : "附宝", "relation" : "wife"},
+		{"from" : "黄帝", "to" : "嫘祖", "relation" : "wife"},
 		
-		{"from" : "huang-di", "to" : "xuan-xiao", "relation" : "son"},
-		{"from" : "lei-zhu", "to" : "xuan-xiao", "relation" : "son", "type" : "noshow"},
-		{"from" : "huang-di", "to" : "chang-yi", "relation" : "son"},
-		{"from" : "lei-zhu", "to" : "chang-yi", "relation" : "son", "type" : "noshow"},
-		{"from" : "chang-yi", "to" : "chang-pu", "relation" : "wife"},
+		{"from" : "黄帝", "to" : "玄嚣", "relation" : "son"},
+		{"from" : "嫘祖", "to" : "玄嚣", "relation" : "son", "type" : "noshow"},
+		{"from" : "黄帝", "to" : "昌意", "relation" : "son"},
+		{"from" : "嫘祖", "to" : "昌意", "relation" : "son", "type" : "noshow"},
+		{"from" : "昌意", "to" : "昌仆", "relation" : "wife"},
 		
-		{"from" : "chang-yi", "to" : "zhuanxu-di", "relation" : "son"},
-		{"from" : "chang-pu", "to" : "zhuanxu-di", "relation" : "son", "type" : "noshow"},
+		{"from" : "玄嚣", "to" : "蟜极", "relation" : "son"},
+		{"from" : "蟜极", "to" : "帝喾", "relation" : "son"},
+		{"from" : "帝喾", "to" : "陈锋氏", "relation" : "wife"},
+		{"from" : "帝喾", "to" : "娵訾氏", "relation" : "wife"},
+		{"from" : "帝喾", "to" : "尧", "relation" : "son"},
 		
-		{"from" : "zhuanxu-di", "to" : "di-ku", "relation" : ""},
-		{"from" : "di-ku", "to" : "di-yao", "relation" : ""},
-		{"from" : "di-yao", "to" : "di-shun", "relation" : ""},
-		{"from" : "di-shun", "to" : "da-yu", "relation" : ""}
+		{"from" : "帝喾", "to" : "帝挚", "relation" : "son"},
+		{"from" : "娵訾氏", "to" : "帝挚", "relation" : "son"},
+		{"from" : "陈锋氏", "to" : "尧", "relation" : "son"},
+		
+		{"from" : "昌意", "to" : "颛顼", "relation" : "son"},
+		{"from" : "昌仆", "to" : "颛顼", "relation" : "son", "type" : "noshow"},
+		
+		{"from" : "颛顼", "to" : "帝喾", "relation" : ""},
+		
+		
+		{"from" : "尧", "to" : "舜", "relation" : ""},
+		{"from" : "舜", "to" : "禹", "relation" : ""}
 	]
  }
  
