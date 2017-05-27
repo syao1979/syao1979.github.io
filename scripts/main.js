@@ -10,6 +10,7 @@
 	var renderer
 	var layout
 	var animation = false
+	var geom
 	
 	var nodeSize = 24
 	
@@ -47,7 +48,7 @@
 	
 		return Viva.Graph.geom();
 	}
-				
+					
 	//-- node display customization
 	function showNode(node) {
 		let imgURL = '/images/man.png'
@@ -103,7 +104,7 @@
 	function placeLink(linkUI, fromPos, toPos) {
 		var toNodeSize = nodeSize,
 			fromNodeSize = nodeSize;
-		var geom = arrowMarker()
+		
 		var from = geom.intersectRect(
 				// rectangle:
 						fromPos.x - fromNodeSize / 2, // left
@@ -138,9 +139,11 @@
         //constructor: jHist,
 		init_display : function (gid){
 			console.log(gid)
-			graphics = Viva.Graph.View.svgGraphics(); 
+			graphics = Viva.Graph.View.svgGraphics();
 			
+			geom = arrowMarker()
 			graphics.node(showNode).placeNode(placeNode).link(showLink).placeLink(placeLink);
+			//graphics.link(showLink).placeLink(placeLink);
 			
 			layout = Viva.Graph.Layout.forceDirected(graph, {
 			   springLength : VIEW_PARAM['springLength'],
