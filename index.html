@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>China</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="scripts/vivagraph.js"></script>
+		<!-- script src="scripts/utils.js"></script -->
+        
+        <script type='text/javascript'>
+            var dataReady = false
+            var graph = Viva.Graph.graph();
+            var graphics
+            var renderer
+            var layout
+            
+            var VIEW_PARAM = {
+                "nodeSize" : 15,
+                "springLength" : 100,        // view layout setting
+                "springCoeff" : 0.0028,     // same
+                "gravity" : -2.2,           // same
+                "theta" : 0.8,              // same
+                "dragCoeff" : 0.02,         // same
+                "timeStep" : 20,            // same
+            }
+        
+            $(function() {
+                //var graphGenerator = Viva.Graph.generator();
+                //graph = graphGenerator.grid(10, 10);
+                dataReady = true
+                init_display()
+                //testNodes()
+                // window resize event handler
+                $( window ).resize(function() { onWindowResize() });
+				
+				fetch_json()
+				
+            })
+			
+			
+            
+            function init_display(){
+                graphics = Viva.Graph.View.svgGraphics(); 
+				var nodeSize = 24
+				var geom = arrowMarker()
+                graphics.node(function(node) {
+					let imgURL = '/images/man.png'
+					if (node.data.gender == 'f') {
+						imgURL = '/images/woman.png'
+					}
+					if (node.data.image && node.data.image != "") {
+						imgURL = node.data.image
+					}
+					// This time it's a group of elements: http://www.w3.org/TR/SVG/struct.html#Groups
+					var ui = Viva.Graph.svg('g'),
+						// Create SVG text element with user id as content
+						
+						svgText = Viva.Graph.svg('text').attr('y', '-4px').text(node.data.name),
+						img = Viva.Graph.svg('image')
+						   .attr('width', nodeSize)
+						   .attr('height', nodeSize)
+						   .link(imgURL);
+	  
+					ui.append(svgText);
+					ui.append(img);
+					return ui;
+
+                 })
+                 .placeNode(function(nodeUI, pos){
+					 nodeUI.attr('transform',
+                            'translate(' +
+                                  (pos.x - nodeSize/2) + ',' + (pos.y - nodeSize/2) +
+                            ')');
+                 })
+				 .link(function(link){
+					switch (link.data.relation) {
+						case 'wife' : return Viva.Graph.svg('path').attr('stroke', 'red')
+						case 'son'	: 	return Viva.Graph.svg('path')
+									   .attr('stroke', 'gray')
+									   .attr('marker-end', 'url(#Triangle)');
+						default : return Viva.Graph.svg('path').attr('stroke', 'gray')
+					}
+					
+					//return Viva.Graph.svg('path').attr('stroke', '')
+//						return Viva.Graph.svg('path')
+//                           .attr('stroke', 'red')
+//                           .attr('stroke-dasharray', '5, 5');
+				 }).placeLink(function(linkUI, fromPos, toPos) {
+					//// linkUI - is the object returend from link() callback above.
+					//var data = 'M' + fromPos.x + ',' + fromPos.y +
+					//		   'L' + toPos.x + ',' + toPos.y;
+					//
+					//// 'Path data' (http://www.w3.org/TR/SVG/paths.html#DAttribute )
+					//// is a common way of rendering paths in SVG:
+					//linkUI.attr("d", data);
+					var toNodeSize = nodeSize,
+						fromNodeSize = nodeSize;
+	
+					var from = geom.intersectRect(
+							// rectangle:
+									fromPos.x - fromNodeSize / 2, // left
+									fromPos.y - fromNodeSize / 2, // top
+									fromPos.x + fromNodeSize / 2, // right
+									fromPos.y + fromNodeSize / 2, // bottom
+							// segment:
+									fromPos.x, fromPos.y, toPos.x, toPos.y)
+							   || fromPos; // if no intersection found - return center of the node
+	
+					var to = geom.intersectRect(
+							// rectangle:
+									toPos.x - toNodeSize / 2, // left
+									toPos.y - toNodeSize / 2, // top
+									toPos.x + toNodeSize / 2, // right
+									toPos.y + toNodeSize / 2, // bottom
+							// segment:
+									toPos.x, toPos.y, fromPos.x, fromPos.y)
+								|| toPos; // if no intersection found - return center of the node
+
+					var data = 'M' + from.x + ',' + from.y +
+							   'L' + to.x + ',' + to.y;
+	
+					linkUI.attr("d", data);
+				});
+                
+                layout = Viva.Graph.Layout.forceDirected(graph, {
+                   springLength : VIEW_PARAM['springLength'],
+                   springCoeff : VIEW_PARAM['springCoeff'],
+                   dragCoeff : VIEW_PARAM['dragCoeff'],
+                   gravity : VIEW_PARAM['gravity']
+                });
+
+                renderer = Viva.Graph.View.renderer(graph, {
+                        layout    : layout,
+                        graphics  : graphics,
+                        container : document.getElementById('graphContainer')
+                });
+
+                renderer.run();
+				//renderer.pause()
+
+            }
+            //-----------
+			
+			function arrowMarker() {
+				var createMarker = function(id) {
+                    return Viva.Graph.svg('marker')
+                               .attr('id', id)
+                               .attr('viewBox', "0 0 10 10")
+                               .attr('refX', "10")
+                               .attr('refY', "5")
+                               .attr('markerUnits', "strokeWidth")
+                               .attr('markerWidth', "10")
+                               .attr('markerHeight', "5")
+                               .attr('orient', "auto");
+                },
+
+                marker = createMarker('Triangle');
+				marker.append('path').attr('d', 'M 0 0 L 10 5 L 0 10 z');
+				
+				// Marker should be defined only once in <defs> child element of root <svg> element:
+				var defs = graphics.getSvgRoot().append('defs');
+				defs.append(marker);
+	
+				return Viva.Graph.geom();
+			}
+			            
+            
+            function onWindowResize(){
+                if (dataReady) {
+                    renderer.reset()
+                }
+            }
+            
+
+			
+			
+			function fetch_json() {
+				console.log('fetch file...')
+				var file = '/data/shang_gu.json'
+				$.ajax({
+					dataType: "json",
+					async: true,
+					url: file,
+					success: function(response) {
+						addNodes(response.nodes)
+						addLinks(response.links)
+						//console.dir(response)
+					},
+					error: function(xhr, ajaxOptions, thrownError){
+						console.dir('failed to fetch file ' + file)
+						console.dir(xhr)
+					}
+				});
+			}
+			
+			function addNodes(nodes) {
+				for (let n=0; n<nodes.length; n++) {
+					let node = nodes[n]
+					graph.addNode(node.id, node)
+				}
+			}
+			
+			function addLinks(links) {
+				for (let n=0; n<links.length; n++) {
+					let link = links[n]
+					graph.addLink(link.from, link.to, link)
+				}
+			}
+        </script>
+        <style type='text/css'>
+            body, svg, #graphContainer {
+                height: 100%;
+                width: 100%;
+                position: absolute;
+                margin: 0;
+            }
+            .label {
+                position: absolute;
+                top: 10px;
+                color: white;
+                font-size: 18px;
+                left: 10px;
+                font-family: Verdana;
+            }
+        </style>
+    </head>
+    <body>
+        <div id='graphContainer'></div>
+    </body>
+</html>

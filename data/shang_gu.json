@@ -1,0 +1,40 @@
+ {
+	"nodes" : [
+		{"id": "shao-dian", "name": "少典"},
+		{"id": "fu-bao", "name": "附宝", "gender": "f"},
+		
+		{"id": "huang-di", "name": "黄帝", "image":"/images/huang-di.jpg", "ref":"http://baike.baidu.com/item/%E9%BB%84%E5%B8%9D/118887?fr=aladdin"},
+		{"id": "lei-zhu", "name": "嫘祖", "gender":"f"},
+		{"id": "zhuanxu-di", "name": ["颛顼", "高阳"]},
+		
+		{"id": "xuan-xiao", "name": "玄嚣"},
+		{"id": "chang-yi", "name": "昌意"},
+		{"id": "chang-pu", "name": "昌仆", "gender": "f"},
+
+		{"id": "di-ku", "name": "帝喾"},
+		{"id": "di-yao", "name": "尧"},
+		{"id": "di-shun", "name": "舜"},
+		{"id": "da-yu", "name": "YU"}
+	],
+	"links" : [
+		{"from" : "shao-dian", "to" : "huang-di", "relation" : "son"},
+		{"from" : "fu-bao", "to" : "huang-di", "relation" : "son"},
+		{"from" : "shao-dian", "to" : "fu-bao", "relation" : "wife"},
+		{"from" : "huang-di", "to" : "lei-zhu", "relation" : "wife"},
+		
+		{"from" : "huang-di", "to" : "xuan-xiao", "relation" : "son"},
+		{"from" : "lei-zhu", "to" : "xuan-xiao", "relation" : "son"},
+		{"from" : "huang-di", "to" : "chang-yi", "relation" : "son"},
+		{"from" : "lei-zhu", "to" : "chang-yi", "relation" : "son"},
+		{"from" : "chang-yi", "to" : "chang-pu", "relation" : "wife"},
+		
+		{"from" : "chang-yi", "to" : "zhuanxu-di", "relation" : "son"},
+		{"from" : "chang-pu", "to" : "zhuanxu-di", "relation" : "son"},
+		
+		{"from" : "zhuanxu-di", "to" : "di-ku", "relation" : ""},
+		{"from" : "di-ku", "to" : "di-yao", "relation" : ""},
+		{"from" : "di-yao", "to" : "di-shun", "relation" : ""},
+		{"from" : "di-shun", "to" : "da-yu", "relation" : ""}
+	]
+ }
+ 
