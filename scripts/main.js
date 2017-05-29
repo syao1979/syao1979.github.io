@@ -5,28 +5,11 @@
  */
 
 (function( window ) {
-	var graph = Viva.Graph.graph();
-	var graphics
-	var renderer
-	var layout
-	var animation = false
 	var geom
-	
 	var nodeSize = 24
-	
-	var VIEW_PARAM = {
-		"nodeSize" : 15,
-		"springLength" : 80,        // view layout setting
-		"springCoeff" : 0.0028,     // same
-		"gravity" : -22,           // same
-		"theta" : 0.8,              // same
-		"dragCoeff" : 0.02,         // same
-		"timeStep" : 20,            // same
-	}
-	
 
 	// for arrow link
-	function arrowMarker() {
+	function arrowMarker(graphics) {
 		var createMarker = function(id) {
 			return Viva.Graph.svg('marker')
 					   .attr('id', id)
@@ -48,9 +31,14 @@
 	
 		return Viva.Graph.geom();
 	}
+	
+	function mouseDownOnNode(node) {
+		console.log("mouseDownOnNode : " + node.id)
+	}
 					
-	//-- node display customization
-	function showNode(node) {
+	//-- node customization
+	var callbacks = {};
+	function nodeBehave(node) {
 		let imgURL = '/images/man.png'
 		if (node.data.type == "di-wang") {
 			if (node.data.gender == 'f') {
@@ -79,8 +67,27 @@
 
 		ui.append(svgText);
 		ui.append(img);
+		
+		// mouse hover and leave event 
+		//$(ui).hover(function() { // mouse over
+		//	console.log('hover node ' + node.id);
+		//}, function() { // mouse out
+		//	console.log('mouse out node ' + node.id);
+		//})
+		
+		// go through registered callbacks
+		Object.keys(callbacks).forEach(
+			function(callbacktype) {
+				ui.addEventListener(callbacktype, function(e) {
+					callbacks[callbacktype](node, e)
+				}
+				);
+			}
+		)
 		return ui;
 	}
+	
+	
 	function placeNode(nodeUI, pos){
 		nodeUI.attr('transform','translate(' + (pos.x - nodeSize/2) + ',' + (pos.y - nodeSize/2) +')');
 	}
@@ -101,6 +108,7 @@
 		//                           .attr('stroke', 'red')
 		//                           .attr('stroke-dasharray', '5, 5');
 	}
+	
 	function placeLink(linkUI, fromPos, toPos) {
 		var toNodeSize = nodeSize,
 			fromNodeSize = nodeSize;
@@ -132,45 +140,58 @@
 	}
 	
 	//-- the main jHist class
-    var jHist = function(){}
+    var jHist = function(){
+		this.graph = Viva.Graph.graph()
+		this.animation = false
+		
+		this.VIEW_PARAM = {
+			"nodeSize" : 15,
+			"springLength" : 80,        // view layout setting
+			"springCoeff" : 0.0028,     // same
+			"gravity" : -22,           // same
+			"theta" : 0.8,              // same
+			"dragCoeff" : 0.02,         // same
+			"timeStep" : 20,            // same
+		}
+	}
 	
 	//exposed member functions of jMol
     jHist.prototype = {
         //constructor: jHist,
 		init_display : function (gid){
 			console.log(gid)
-			graphics = Viva.Graph.View.svgGraphics();
+			this.graphics = Viva.Graph.View.svgGraphics();
 			
-			geom = arrowMarker()
-			graphics.node(showNode).placeNode(placeNode).link(showLink).placeLink(placeLink);
-			//graphics.link(showLink).placeLink(placeLink);
+			geom = arrowMarker(this.graphics)
 			
-			layout = Viva.Graph.Layout.forceDirected(graph, {
-			   springLength : VIEW_PARAM['springLength'],
-			   springCoeff : VIEW_PARAM['springCoeff'],
-			   dragCoeff : VIEW_PARAM['dragCoeff'],
-			   gravity : VIEW_PARAM['gravity']
+			this.graphics.node(nodeBehave).placeNode(placeNode).link(showLink).placeLink(placeLink);
+			
+			this.layout = Viva.Graph.Layout.forceDirected(this.graph, {
+			   springLength : this.VIEW_PARAM['springLength'],
+			   springCoeff : this.VIEW_PARAM['springCoeff'],
+			   dragCoeff : this.VIEW_PARAM['dragCoeff'],
+			   gravity : this.VIEW_PARAM['gravity']
 			});
 		
 			let domObj = window.document.body
 			if (gid != undefined) {
 				domObj = document.getElementById(gid)
 			}
-			renderer = Viva.Graph.View.renderer(graph, {
-					layout    : layout,
-					graphics  : graphics,
+			this.renderer = Viva.Graph.View.renderer(this.graph, {
+					layout    : this.layout,
+					graphics  : this.graphics,
 					container : domObj
 			});
 		
-			renderer.run();
-			animation = true
-			//renderer.pause()
+			this.renderer.run();
+			this.animation = true
+			//this.renderer.pause()
 		},
 		
 		addNodes : function addNodes(nodes) {
 				for  (let n=0; n<nodes.length; n++) {
 					let node = nodes[n]
-					graph.addNode(node.id, node)
+					this.graph.addNode(node.id, node)
 				}
 			},
 			
@@ -178,19 +199,30 @@
 			for (let n=0; n<links.length; n++) {
 				let link = links[n]
 				if (link.type != 'noshow') {
-					graph.addLink(link.from, link.to, link)
+					this.graph.addLink(link.from, link.to, link)
 				}
 			}
 		},
 		
-		grephics : function(){ return graphics},
-		graph : function() { return graph},
-		renderer : function(){ return renderer},
-		layout : function() { return layout},
+		toJSON : function(){
+			let nodes = []
+			let links = []
+			this.graph.forEachNode(function(node){
+				nodes.push(node.data)
+			})
+			this.graph.forEachLink(function(link){
+				links.push(link.data)
+			})
+			return {"nodes" : nodes, "links": links}
+		},
 		
-		isrunning : function() { return animation; },
-		pause : function() { animation = false; renderer.pause(); },
-		resume : function() { animation = true; renderer.resume(); }
+		
+		isrunning : function() { return this.animation; },
+		pause : function() { this.animation = false; this.renderer.pause(); },
+		resume : function() { this.animation = true; this.renderer.resume(); },
+		
+		getNode : function(nid){ return },
+		setCallback : function(callbacktype, f){ callbacks[callbacktype] = f },
 	}
 	
     // Create a jMol object and put it i global scope

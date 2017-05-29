@@ -25,14 +25,14 @@
 	],
 	"links" : [
 		{"from" : "少典", "to" : "黄帝", "relation" : "son"},
-		{"from" : "附宝", "to" : "黄帝", "relation" : "son", "type" : "noshow"},
+		{"from" : "附宝", "to" : "黄帝", "relation" : "son", "type" : "noshow2"},
 		{"from" : "少典", "to" : "附宝", "relation" : "wife"},
 		{"from" : "黄帝", "to" : "嫘祖", "relation" : "wife"},
 		
 		{"from" : "黄帝", "to" : "玄嚣", "relation" : "son"},
-		{"from" : "嫘祖", "to" : "玄嚣", "relation" : "son", "type" : "noshow"},
+		{"from" : "嫘祖", "to" : "玄嚣", "relation" : "son", "type" : "noshow2"},
 		{"from" : "黄帝", "to" : "昌意", "relation" : "son"},
-		{"from" : "嫘祖", "to" : "昌意", "relation" : "son", "type" : "noshow"},
+		{"from" : "嫘祖", "to" : "昌意", "relation" : "son", "type" : "noshow2"},
 		{"from" : "昌意", "to" : "昌仆", "relation" : "wife"},
 		
 		{"from" : "玄嚣", "to" : "蟜极", "relation" : "son"},
@@ -46,7 +46,7 @@
 		{"from" : "陈锋氏", "to" : "尧", "relation" : "son"},
 		
 		{"from" : "昌意", "to" : "颛顼", "relation" : "son"},
-		{"from" : "昌仆", "to" : "颛顼", "relation" : "son", "type" : "noshow"},
+		{"from" : "昌仆", "to" : "颛顼", "relation" : "son", "type" : "noshow2"},
 		
 		{"from" : "颛顼", "to" : "帝喾", "relation" : ""},
 		

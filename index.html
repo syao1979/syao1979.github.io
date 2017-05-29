@@ -10,11 +10,12 @@
 		<!-- script src="scripts/utils.js"></script -->
         
         <script type='text/javascript'>
-
-        
             $(function() {
                 dataReady = true
+				jHist.setCallback('mousedown', mouseDownOnNode)
+				jHist.setCallback('mouseover', mouseHoverOnNode)
                 jHist.init_display('graphContainer')
+				
 
                 				
 				fetch_json()
@@ -24,8 +25,16 @@
 
             })
 			
+			function mouseDownOnNode(node, e) {
+				console.log("mouseDownOnNode "+node.id+" at (" + e.clientX +", " + e.clientY + ")")
+			}
+			
+			function mouseHoverOnNode(node, e) {
+				console.log("mouseHoverOnNode " +node.id+" at (" + e.clientX +", " + e.clientY + ")")
+			}
+			
 			function  initui(){
-				$(".tab, .left-tab, .right-tab").css('zIndex', '10000')
+				//
 			}
 			
 			function addEventHandlers() {
@@ -59,6 +68,31 @@
 						$('#help-tab').css('zIndex', '10000').show("slide", { direction: "left" }, 500);
 					} 
 				})
+				
+				// install zoom hanlder
+				$('.tools').mousedown(function(e){
+					console.log("tools ")
+					e.preventDefault()
+					var delay = 20
+					zoomaction = true
+					if ($(this).hasClass('zoomin')){
+						(function zoomin(){
+							if (!zoomaction) { return}
+							jHist.renderer.zoomIn()
+							setTimeout(zoomin, delay)
+						})()
+						return false
+					} else if ($(this).hasClass('zoomout')){
+						(function zoomout(){
+							if (!zoomaction) { return}
+							jHist.renderer.zoomOut()
+							setTimeout(zoomout, delay)
+						})()
+						return false
+					} else if ($(this).hasClass('zoomfit')){
+						fitScreen()
+					}
+				})
 			}
 			
 			function fetch_json() {
@@ -70,6 +104,11 @@
 					url: file,
 					success: function(response) {
 						jHist.addNodes(response.nodes)
+						
+						// pin "黄帝"
+						let pinNode = jHist.graph.getNode("黄帝")
+						pinNode.isPinned = true
+						jHist.layout.pinNode(pinNode, true);
 						jHist.addLinks(response.links)
 						//console.dir(response)
 					},
@@ -82,7 +121,7 @@
             
 			function onWindowResize(){
 				if (dataReady) {
-					jHist.renderer().reset()
+					jHist.renderer.reset()
 				}
 			}
 
@@ -105,6 +144,7 @@
 				padding: 4px;
 				vertical-align : top;
 				opacity: 0.5;
+				z-index: 1000;
 				-moz-border-radius : 6px;
 				-webkit-border-radius : 6px;
 				-khtml-border-radius : 6px;
@@ -155,6 +195,8 @@
 				background-color: #fff;
 				padding: 2px;
 				opacity: 0.3;
+				z-index: 1000;
+				
 				-moz-border-radius : 6px;
 				-webkit-border-radius : 6px;
 				-khtml-border-radius : 6px;
@@ -166,10 +208,46 @@
 			#usage:hover, #config:hover, #dismiss-usage:hover {
 				opacity: 1;
 			}
+			
+			#toolbox {
+				position : fixed;
+				bottom: 10px;
+				font-size: 12px;
+				right: 10px;
+				width: 30px;
+	
+				background-color: #eee;
+				opacity: 0.3;
+				z-index: 1000;
+				
+				padding: 2px;
+				-moz-border-radius : 4px;
+				-webkit-border-radius : 4px;
+				-khtml-border-radius : 4px;
+				border-radius : 4px;
+			}
+			#toolbox{
+				padding: 2px;
+			}
+			.toolcell{
+				padding-top: 2px;
+			}
+			#toolbox:hover{
+				background-color : #ddd;
+				opacity: 1;
+			}
+			#toolbox .toolcell{
+				border-radius : 4px;
+			}
+	
+			#toolbox .toolcell:hover{
+				background-color: #999;
+			}
 
         </style>
     </head>
     <body oncontextmenu="return false;">
+		<div id="graphContainer" style="background-color: #fff; "></div>
 		<img id="help-tab" class="tab left-tab" src="/images/info20x20.png" title="help info"> </img>
 		<span id="usage">
 			<span class="dismiss-container"><img id="dismiss-usage" class="dismiss" src="/images/arrow_left20x20.png" title="hide help info"></img></span>
@@ -183,7 +261,24 @@
 			</ul>
 		</span>
 				
-		<div id="graphContainer" style="background-color: #fff; "></div>
+		<img id="config-tab" class="tab right-tab" src="/images/config20x20.png" title="configuration"></img>
+		
 
+		<!-- size control -->
+		<table id="toolbox">
+			<tr>
+				<td class="toolcell" ><img id="zone-select" class="tools zone-select" src="/images/select40x40.png" style="width:20px; height: 20px" title="select"></img></td>
+			</tr>
+			<tr><td>
+			<tr>
+				<td class="toolcell"><img id="size-fit" class="tools zoomfit" src="/images/fit20x20.png" title="fit screen"></img></td>
+			</tr>
+			<tr>
+				<td class="toolcell"><img id="size-fit" class="tools zoomin" src="/images/plus20x20.png" title="zoom in"></img></td>
+			</tr>
+			<tr>
+				<td class="toolcell"><img id="size-fit" class="tools zoomout" src="/images/minus20x20.png" title="zoom out"></img></td>
+			</tr>
+		</table>
     </body>
 </html>
