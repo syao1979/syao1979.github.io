@@ -52,7 +52,9 @@
 		
 		
 		{"from" : "尧", "to" : "舜", "relation" : ""},
-		{"from" : "舜", "to" : "禹", "relation" : ""}
+		{"from" : "舜", "to" : "禹", "relation" : ""},
+        
+        {"from" : "黄帝", "to" : "颛顼", "type" : "di2di"}
 	]
  }
  

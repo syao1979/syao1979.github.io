@@ -3,43 +3,82 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>帝王世系</title>
+		<link href='css/tab_tool.css' rel='stylesheet' type="text/css">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 		<script src="scripts/jquery-ui.js"></script>
         <script src="scripts/vivagraph.js"></script>
 		<script src="scripts/main.js"></script>
 		<!-- script src="scripts/utils.js"></script -->
         
+		<script src="https://use.fontawesome.com/ed433a365e.js"></script>
         <script type='text/javascript'>
+			var CONF_STR = {
+				'new name' : "New Data",
+				'mod data' : "Modify Data",
+				'mod link' : "Modify Link",
+			}
+			
             $(function() {
                 dataReady = true
+				buildConfigPanel()
+				
 				jHist.setCallback('mousedown', mouseDownOnNode)
 				jHist.setCallback('mouseover', mouseHoverOnNode)
                 jHist.init_display('graphContainer')
-				
-
-                				
+					
 				fetch_json()
 				
 				initui()
 				addEventHandlers()
-
             })
 			
+			function buildConfigPanel() {
+				var html = ""
+				for (var key in CONF_STR) {
+					html += '<tr><td class="button edit-type">' + CONF_STR[key] + '</td></tr>'
+				}
+				$('#config').html(html)
+			}
 			function mouseDownOnNode(node, e) {
+				anode = node
 				console.log("mouseDownOnNode "+node.id+" at (" + e.clientX +", " + e.clientY + ")")
+				if ($('#data-collector').is(':visible')) {
+					var name = $('#collector-type').html()
+					
+					if ( name == CONF_STR['new name'] ){
+						console.log(name)
+						$('#collector-connect-to-id').val(node.id)
+					} else if ( name == CONF_STR['mod data'] ) {
+						console.log(name)
+						$("#collector-name-id").val(node.data.id)
+						$("#collector-other-name-id").val(node.data.name)
+						if (node.data.gender == 'f') {
+							$("#collector-gender-id #female").prop('checked', true)
+						} else {
+							$("#collector-gender-id #male").prop('checked', true)
+						}
+						
+						if (node.data.type == 'di-wang') {
+							$("#collector-di-wang-id").prop('checked', true)
+						} else {
+							$("#collector-di-wang-id").prop('checked', false)
+						}
+						
+					} else if ( name == CONF_STR['mod link'] ) {
+						console.log(name)
+					}
+				}
 			}
 			
 			function mouseHoverOnNode(node, e) {
-				console.log("mouseHoverOnNode " +node.id+" at (" + e.clientX +", " + e.clientY + ")")
+				//console.log("mouseHoverOnNode " +node.id+" at (" + e.clientX +", " + e.clientY + ")")
 			}
 			
 			function  initui(){
-				//
+				$( "#data-collector" ).draggable();
 			}
 			
 			function addEventHandlers() {
-				
-				
 				// window resize event handler
                 $( window ).resize(function() { onWindowResize() });
 				document.body.addEventListener('keydown', function (e) {
@@ -54,18 +93,20 @@
 
 				$('.tab').mousedown(function(e){
 					var id = $(this).prop('id')
-					console.log(id)
+					//console.log(id)
 					if (id == 'help-tab'){
-						$(this).css('zIndex', '10000').hide("slide", { direction: "left" }, 500);
-						$('#usage').css('zIndex', '10000').show("slide", { direction: "left" }, 500);
-					} 
+						$(this).hide("slide", { direction: "left" }, 500);
+						$('#usage').show("slide", { direction: "left" }, 500);
+					} else if (id == 'config-tab'){
+						toggleConfigTool(true)
+					}
 				})
 				
 				$('.dismiss').click(function(e){
 					var id = $(this).prop('id')
 					if (id == 'dismiss-usage'){
-						$('#usage').css('zIndex', '10000').hide("slide", { direction: "left" }, 500);
-						$('#help-tab').css('zIndex', '10000').show("slide", { direction: "left" }, 500);
+						$('#usage').hide("slide", { direction: "left" }, 500);
+						$('#help-tab').show("slide", { direction: "left" }, 500);
 					} 
 				})
 				
@@ -93,6 +134,92 @@
 						fitScreen()
 					}
 				})
+				
+				//
+				$('.edit-type').click(function(){
+					let name = $(this).html()
+					
+					if (name == 'Modify Link') {
+						showNewLinkTool(name)
+					} else if(name == "New Data") {
+						showNewDataTool(name)
+					} else if (name == "Modify Data") {
+						showModifyDataTool(name)
+					}
+					$('#data-collector').show()
+					toggleConfigTool(false)
+				})
+			}
+			
+			function showNewLinkTool(name) {
+				$('#collector-type').html(name)
+				$('.mod-node').hide()
+				$('.mod-edge').show()
+			}
+			function showNewDataTool(name) {
+				$('#collector-type').html(name)
+				$('.mod-node, .new-node').show()
+				$('.mod-edge').hide()
+			}
+			function showModifyDataTool(name) {
+				$('#collector-type').html(name)
+				$('.mod-node').show()
+				$('.mod-edge, .new-node').hide()
+			}
+			function toggleConfigTool(hide){
+				if (hide){
+					$('#config-tab').hide("slide", { direction: "right" }, 500);
+					$('#config').show("slide", { direction: "right" }, 500);
+				} else {
+					$('#config').hide("slide", { direction: "right" }, 500);
+					$('#config-tab').show("slide", { direction: "right" }, 500);
+				}
+			}
+			
+			function onAdd() {
+				var linkTo = $('#collector-connect-to-id').val()
+				var name = $('#collector-name-id').val()
+				var oname = $('#collector-other-name-id').val()
+				var gender =  $("#collector-gender-id input:radio[name ='gender']:checked").val();
+				var diwang = $('#collector-di-wang-id').is(':checked')
+				var relation = $('#collector-relation-id').val()
+	
+				function sanity(val, msg) {
+					if (!val) {
+						alert(msg)
+						return false
+					}
+					return true
+				}
+				
+				var ok = sanity(linkTo, "connect-to is missing")
+				if (ok) { ok = sanity(name, "name is missing")}
+				if (ok) {
+					// the node
+					var node = {'id' : name}
+					if (gender == 'f') {
+						node.gender = gender
+					}
+					if (oname) {
+						node.name = oname.split(/[\s,;]+/)
+					}
+					if (diwang) {
+						node.type = 'di-wang'
+					}
+					
+					// the link
+					var link = {'from': linkTo, 'to': name}
+					if (relation != "unknown") {
+						link.relation = relation
+					}
+					// link type ?
+					
+					jHist.addSingleNode(node)
+					jHist.addSingleLink(link, true)
+					//console.log(node)
+					//console.log(link)
+				}
+
 			}
 			
 			function fetch_json() {
@@ -106,9 +233,10 @@
 						jHist.addNodes(response.nodes)
 						
 						// pin "黄帝"
-						let pinNode = jHist.graph.getNode("黄帝")
-						pinNode.isPinned = true
-						jHist.layout.pinNode(pinNode, true);
+						jHist.pinNode("黄帝", true)
+						//let pinNode = jHist.graph.getNode("黄帝")
+						////pinNode.isPinned = true
+						//jHist.layout.pinNode(pinNode, true);
 						jHist.addLinks(response.links)
 						//console.dir(response)
 					},
@@ -124,8 +252,44 @@
 					jHist.renderer.reset()
 				}
 			}
+			
+			// zoom down universe to screen size
+			function fitScreen(){
+				renderer.reset()
+				//renderer.moveTo(0,0)
+				targetscale = desiredScale()
+				let running = inrun
+				if (running){
+					renderer.pause()
+				}
+				zoomFit(targetscale, 1, running);
+			}
 
-        </script>
+			function desiredScale(){
+				var graphRect = layout.getGraphRect();
+				var graphSize = Math.min(graphRect.x2 - graphRect.x1, graphRect.y2 - graphRect.y1);
+				var screenSize = Math.min($("#viewport").width(), $("#viewport").height());
+				var scalefactor = 0.9 // practival observation tells we need to overshut a little
+				return (screenSize / graphSize) * scalefactor;
+			}
+	
+			function zoomFit(targetScale, currentScale, running) {
+				renderer.rerender()
+				if (targetScale < currentScale) {
+					currentScale = renderer.zoomOut();
+	
+					setTimeout(function () {
+						zoomFit(targetScale, currentScale, running);
+					}, 15);
+				} else {
+					if (running){
+						renderer.resume()
+					}
+				}
+			}
+		</script>
+
+		
         <style type='text/css'>
             body, svg, #graphContainer, #main-pan {
                 height: 100%;
@@ -134,116 +298,78 @@
                 margin: 0;
             }
 			
-			.tab, .left-tab, .right-tab {
+			#data-collector {
 				position : fixed;
-				height : 26px;
-				width : 26px;
-				top : 10px;
-				background-color: #eee;
+				top : 100px;
+				left : 10px;
+				font-size: 12px;
+				width: auto;
 	
-				padding: 4px;
-				vertical-align : top;
-				opacity: 0.5;
-				z-index: 1000;
-				-moz-border-radius : 6px;
-				-webkit-border-radius : 6px;
-				-khtml-border-radius : 6px;
-				border-radius : 4px;
-			}
-
-			.left-tab{
-				left : -2px;
-			}
-	
-			.right-tab{
-				right : -6px;
-			}
-	
-			.tab:hover {
 				background-color: #bbb;
-				opacity: 1.0; /* css standard */
-			}
-
-			.dismiss, .sub-menu{
-				cursor : pointer;
-				width  : 14px;
-				height : 14px;
-			}
-			.dismiss-container{
-				padding: 6px;
-				padding-top: 9px;
-				border-radius : 4px;
-			}
-			.dismiss-container:hover{
-				background-color : #bbb;
-			}
-	
-			#usage{
-				text-align: left;
-				color: #666;
-				left: 10px;
-				font-size: 12px;
-				font-family: Verdana;
-				font-weight: bold;
-	
-				left:0px;
-				top:10px;
-				width:auto;
-				position:fixed;
-	
-				display:none;
-				background-color: #fff;
-				padding: 2px;
-				opacity: 0.3;
-				z-index: 1000;
+				z-index: 100;
 				
-				-moz-border-radius : 6px;
-				-webkit-border-radius : 6px;
-				-khtml-border-radius : 6px;
-				border-radius : 6px;
-				border-radius : 6px;
-	
-			}
-
-			#usage:hover, #config:hover, #dismiss-usage:hover {
-				opacity: 1;
-			}
-			
-			#toolbox {
-				position : fixed;
-				bottom: 10px;
-				font-size: 12px;
-				right: 10px;
-				width: 30px;
-	
-				background-color: #eee;
+				padding: 10px;
+				display: none;
 				opacity: 0.3;
-				z-index: 1000;
-				
-				padding: 2px;
 				-moz-border-radius : 4px;
 				-webkit-border-radius : 4px;
 				-khtml-border-radius : 4px;
 				border-radius : 4px;
 			}
-			#toolbox{
-				padding: 2px;
-			}
-			.toolcell{
-				padding-top: 2px;
-			}
-			#toolbox:hover{
-				background-color : #ddd;
+			#data-collector:hover{
 				opacity: 1;
 			}
-			#toolbox .toolcell{
+			
+			.mod{
+				width: 100%;
+			}
+			
+			#config {
+				position : fixed;
+				top : 100px;
+				right : 10px;
+				
+				background-color: #999;
+				
+				opacity: 0.3;
+				-moz-border-radius : 4px;
+				-webkit-border-radius : 4px;
+				-khtml-border-radius : 4px;
 				border-radius : 4px;
 			}
-	
-			#toolbox .toolcell:hover{
-				background-color: #999;
+			.button {
+				cursor: pointer;
+				width: auto;
+				padding: 10px;
+				background-color: #fff;
+				opacity: 0.8;
+				white-space: nowrap;
+				-moz-border-radius : 8px;
+				-webkit-border-radius : 8px;
+				-khtml-border-radius : 8px;
+				border-radius : 8px;
 			}
-
+			.button:hover{
+				background-color: #999;
+				opacity: 1.0
+			}
+			
+			#config:hover{
+				background-color: #888;
+				opacity: 1.0
+			}
+			.edit-type{
+				font-family: monospace;
+				font-weight: bold;
+				font-size: 14px;
+			}
+			
+			.mod td{
+				font-family: monospace;
+				font-weight: bold;
+				font-size: 12px;
+			}
+			
         </style>
     </head>
     <body oncontextmenu="return false;">
@@ -262,14 +388,15 @@
 		</span>
 				
 		<img id="config-tab" class="tab right-tab" src="/images/config20x20.png" title="configuration"></img>
-		
+
+		<table id="config" class="control"></table>
 
 		<!-- size control -->
 		<table id="toolbox">
 			<tr>
-				<td class="toolcell" ><img id="zone-select" class="tools zone-select" src="/images/select40x40.png" style="width:20px; height: 20px" title="select"></img></td>
+				<td class="toolcell"><img id="zone-select" class="tools zone-select" src="/images/select40x40.png" style="width:20px; height: 20px" title="select"></img></td>
 			</tr>
-			<tr><td>
+			<tr></tr>
 			<tr>
 				<td class="toolcell"><img id="size-fit" class="tools zoomfit" src="/images/fit20x20.png" title="fit screen"></img></td>
 			</tr>
@@ -280,5 +407,70 @@
 				<td class="toolcell"><img id="size-fit" class="tools zoomout" src="/images/minus20x20.png" title="zoom out"></img></td>
 			</tr>
 		</table>
+		
+		<!--  -->
+		<div id="data-collector">
+			<table class="mod">
+				<tr><td id="collector-type" style="font-size: 16px; font-weight: bold ">New Data</td>
+					<td style="text-align: right"><i class="fa fa-times fa-1g" aria-hidden="true" title="close" onclick="$('#data-collector').hide()"></i></td>
+				</tr>
+			</table> 
+			<table id="mod-node" class="mod">
+				<tr class="new-node mod-node">
+					<td>Connect to:</td>
+					<td><input id="collector-connect-to-id" type=text></td>
+				</tr>
+				<tr class="mod-node">
+					<td>Name:</td>
+					<td><input id="collector-name-id" type="text"></td>
+				</tr>
+				<tr class="mod-node">
+					<td>Other names:</td>
+					<td><input id="collector-other-name-id" type="text"></td>
+				</tr>
+				<tr class="mod-node">
+					<td>Gender:</td>
+					<td id="collector-gender-id" >Male
+						<input type="radio" id="male" name="gender" checked="checked" value='m'> &nbsp; &nbsp; Female
+						<input type="radio" id="female" name="gender" value='f'>
+					</td>
+				</tr>
+				<tr class="mod-node">
+					<td>帝王:</td>
+					<td><input id="collector-di-wang-id" type="checkbox"></td>
+				</tr>
+				
+				<tr class="mod-edge">
+					<td>Node 1:</td>
+					<td><input id="collector-link-node-1" type=text></td>
+				</tr>
+				<tr class="mod-edge">
+					<td>Node 2:</td>
+					<td><input id="collector-link-node-2" type="text"></td>
+				</tr>
+
+				<tr class="new-node">
+					<td>Relation:</td>
+					<td>
+						<select id="collector-relation-id" >
+							<option>unknown</option>
+							<option>son</option>
+							<option>daughter</option>
+							<option>wife</option>
+							<option>di2di</option>
+						</select>
+					</td>
+				</tr>
+			</table>
+			
+			<table class="mod">
+				<tr>
+					<tr></tr>
+					<td style="text-align: right"><i class="fa fa-check" aria-hidden="true" onclick="onAdd()"></i></td>
+				</tr>
+			</table>
+		</div>
+
+		
     </body>
 </html>

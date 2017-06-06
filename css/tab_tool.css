@@ -1,0 +1,123 @@
+.tab, .left-tab, .right-tab {
+	position : fixed;
+	height : 26px;
+	width : 26px;
+	top : 10px;
+	background-color: #eee;
+
+	padding: 4px;
+	vertical-align : top;
+	opacity: 0.5;
+	z-index: 10;
+	-moz-border-radius : 6px;
+	-webkit-border-radius : 6px;
+	-khtml-border-radius : 6px;
+	border-radius : 4px;
+}
+
+.left-tab{
+	left : -2px;
+}
+
+.right-tab{
+	right : -6px;
+}
+
+.tab:hover {
+	background-color: #bbb;
+	opacity: 1.0; 
+}
+
+.dismiss, .sub-menu{
+	cursor : pointer;
+	width  : 14px;
+	height : 14px;
+}
+.dismiss-container{
+	padding: 6px;
+	padding-top: 9px;
+	border-radius : 4px;
+}
+.dismiss-container:hover{
+	background-color : #bbb;
+}
+
+#usage{
+	text-align: left;
+	color: #666;
+	left: 10px;
+	font-size: 12px;
+	font-family: Verdana;
+	font-weight: bold;
+
+	left:0px;
+	top:10px;
+	width:auto;
+	position:fixed;
+
+	display:none;
+	background-color: #fff;
+	padding: 2px;
+	opacity: 0.3;
+	z-index: 10;
+	
+	-moz-border-radius : 6px;
+	-webkit-border-radius : 6px;
+	-khtml-border-radius : 6px;
+	border-radius : 6px;
+	border-radius : 6px;
+
+}
+#config {
+	position : fixed;
+	right : 2px;
+	top : 30px;
+	width : auto;
+	height : auto;
+	display : none;
+	background-color : #fff;
+	padding : 10px;
+	opacity: 0.3;
+	-moz-border-radius : 6px;
+	-webkit-border-radius : 6px;
+	-khtml-border-radius : 6px;
+	border-radius : 6px;
+}
+#usage:hover, #config:hover, #dismiss-usage:hover {
+	opacity: 1;
+}
+
+#toolbox {
+	position : fixed;
+	bottom: 10px;
+	font-size: 12px;
+	right: 10px;
+	width: 30px;
+
+	background-color: #eee;
+	opacity: 0.3;
+	z-index: 10;
+	
+	padding: 2px;
+	-moz-border-radius : 4px;
+	-webkit-border-radius : 4px;
+	-khtml-border-radius : 4px;
+	border-radius : 4px;
+}
+#toolbox{
+	padding: 2px;
+}
+.toolcell{
+	padding-top: 2px;
+}
+#toolbox:hover{
+	background-color : #ddd;
+	opacity: 1;
+}
+#toolbox .toolcell{
+	border-radius : 4px;
+}
+
+#toolbox .toolcell:hover{
+	background-color: #999;
+}
