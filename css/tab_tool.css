@@ -109,6 +109,9 @@
 }
 .toolcell{
 	padding-top: 2px;
+	/*border: 1px solid;*/
+	text-align: center;
+	background-color: #ccc;
 }
 #toolbox:hover{
 	background-color : #ddd;
@@ -120,4 +123,11 @@
 
 #toolbox .toolcell:hover{
 	background-color: #999;
+}
+
+.low{
+	background-color: #ccc;
+}
+.high{
+	background-color: #444;
 }

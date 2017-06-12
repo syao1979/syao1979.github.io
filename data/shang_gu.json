@@ -5,7 +5,7 @@
 		
 		{"id": "黄帝", "type": "di-wang", "ref":"http://baike.baidu.com/item/%E9%BB%84%E5%B8%9D/118887?fr=aladdin"},
 		{"id": "嫘祖", "gender":"f"},
-		{"id": "颛顼", "name": ["颛顼", "高阳"], "type": "di-wang"},
+		{"id": "颛顼", "name": ["高阳"], "type": "di-wang"},
 		
 		{"id": "玄嚣"},
 		{"id": "昌意"},
@@ -14,25 +14,27 @@
 		{"id": "蟜极"},
 		
 	
-		{"id": "帝喾", "name": ["帝喾", "高辛"], "type": "di-wang"},
+		{"id": "帝喾", "name": ["高辛"], "type": "di-wang"},
 		{"id": "陈锋氏", "gender": "f"},
 		{"id": "娵訾氏", "gender": "f"},
 		{"id": "帝挚", "type": "di-wang"},
 		
-		{"id": "尧", "name": ["尧", "放勋"], "type": "di-wang"},
+		{"id": "尧", "name": ["放勋"], "type": "di-wang"},
 		{"id": "舜", "type": "di-wang"},
-		{"id": "禹", "type": "di-wang"}
+		{"id": "禹", "type": "di-wang"},
+        {"id": "Me"}
 	],
 	"links" : [
 		{"from" : "少典", "to" : "黄帝", "relation" : "son"},
-		{"from" : "附宝", "to" : "黄帝", "relation" : "son", "type" : "noshow2"},
+		{"from" : "附宝", "to" : "黄帝", "relation" : "son"},
 		{"from" : "少典", "to" : "附宝", "relation" : "wife"},
 		{"from" : "黄帝", "to" : "嫘祖", "relation" : "wife"},
 		
 		{"from" : "黄帝", "to" : "玄嚣", "relation" : "son"},
-		{"from" : "嫘祖", "to" : "玄嚣", "relation" : "son", "type" : "noshow2"},
+                
+		{"from" : "嫘祖", "to" : "玄嚣", "relation" : "son"},
 		{"from" : "黄帝", "to" : "昌意", "relation" : "son"},
-		{"from" : "嫘祖", "to" : "昌意", "relation" : "son", "type" : "noshow2"},
+		{"from" : "嫘祖", "to" : "昌意", "relation" : "son"},
 		{"from" : "昌意", "to" : "昌仆", "relation" : "wife"},
 		
 		{"from" : "玄嚣", "to" : "蟜极", "relation" : "son"},
@@ -46,15 +48,18 @@
 		{"from" : "陈锋氏", "to" : "尧", "relation" : "son"},
 		
 		{"from" : "昌意", "to" : "颛顼", "relation" : "son"},
-		{"from" : "昌仆", "to" : "颛顼", "relation" : "son", "type" : "noshow2"},
+		{"from" : "昌仆", "to" : "颛顼", "relation" : "son"},
 		
 		{"from" : "颛顼", "to" : "帝喾", "relation" : ""},
-		
+        
+        {"from" : "颛顼", "to" : "Me", "relation" : "son", "hide": "true"},
 		
 		{"from" : "尧", "to" : "舜", "relation" : ""},
 		{"from" : "舜", "to" : "禹", "relation" : ""},
         
-        {"from" : "黄帝", "to" : "颛顼", "type" : "di2di"}
+        {"from" : "黄帝", "to" : "颛顼", "type" : "di2di"},
+        {"from" : "颛顼", "to" : "帝挚", "type" : "di2di"}
+        
 	]
  }
  

@@ -12,21 +12,32 @@
         
 		<script src="https://use.fontawesome.com/ed433a365e.js"></script>
         <script type='text/javascript'>
+			var new_name = "New Data"
+			var mod_data = "Modify Data"
+			var mod_link = "Modify Link"
+			var add_link = "Add Link"
 			var CONF_STR = {
-				'new name' : "New Data",
-				'mod data' : "Modify Data",
-				'mod link' : "Modify Link",
+				'new name' : new_name,
+				'mod data' : mod_data,
+				'mod link' : mod_link,
+				'add link' : add_link,
 			}
+			var flop = true
+			var pin = false
+			var glinks = null	//global links
+			
+			var jsonfile = '/data/shang_gu2.json'
 			
             $(function() {
                 dataReady = true
 				buildConfigPanel()
 				
 				jHist.setCallback('mousedown', mouseDownOnNode)
-				jHist.setCallback('mouseover', mouseHoverOnNode)
-                jHist.init_display('graphContainer')
+				.setCallback('mouseup', mouseUpOnNode)
+				.setCallback('mouseover', mouseHoverOnNode)
+                .init_display('graphContainer')
 					
-				fetch_json()
+				fetch_json(jsonfile)
 				
 				initui()
 				addEventHandlers()
@@ -39,16 +50,20 @@
 				}
 				$('#config').html(html)
 			}
+			
 			function mouseDownOnNode(node, e) {
 				anode = node
-				console.log("mouseDownOnNode "+node.id+" at (" + e.clientX +", " + e.clientY + ")")
+				//console.log("mouseDownOnNode "+node.id+" at (" + e.clientX +", " + e.clientY + ")")
+				if (pin) {
+					jHist.toggleNodePin(node.id)
+				}
 				if ($('#data-collector').is(':visible')) {
 					var name = $('#collector-type').html()
 					
-					if ( name == CONF_STR['new name'] ){
+					if ( name == new_name ){
 						console.log(name)
 						$('#collector-connect-to-id').val(node.id)
-					} else if ( name == CONF_STR['mod data'] ) {
+					} else if ( name == mod_data ) {
 						console.log(name)
 						$("#collector-name-id").val(node.data.id)
 						$("#collector-other-name-id").val(node.data.name)
@@ -64,12 +79,60 @@
 							$("#collector-di-wang-id").prop('checked', false)
 						}
 						
-					} else if ( name == CONF_STR['mod link'] ) {
-						console.log(name)
+						let nname = $("#collector-new-name-id").val()
+						if (!nname) {
+							$("#collector-new-name-id").val(node.data.id)
+						}
+					
+					} else if ( [mod_link, add_link].indexOf(name) != -1 ) {
+						if (flop) {
+							$("#from-node-id").val(node.id)
+							if (node.id == $("#to-node-id").val()) {
+								$("#to-node-id").val('')
+							}
+							
+						} else {
+							$("#to-node-id").val(node.id)
+							if (node.id == $("#from-node-id").val()) {
+								$("#from-node-id").val('')
+							}
+						}
+						let fromid = $("#from-node-id").val()
+						let toid = $("#to-node-id").val()
+						if ( fromid && toid) {
+							updateModLinkUI()
+						}
+						flop = !flop
 					}
 				}
 			}
+			function updateModLinkUI() {
+				//console.log('updateModLinkUI')
+				glinks = jHist.getLinks($("#from-node-id").val(), $("#to-node-id").val())
+				$('#collector-link-id').html('')
+				
+				if (glinks.length>0) {
+					for (let n=0; n<glinks.length; n++) {
+						let l = glinks[n]
+						$('#collector-link-id').append('<option>' + l.id + '</option>')
+					}
+					let idx = $('#collector-link-id').prop('selectedIndex')
+					let link = glinks[idx]
+					var rel = link.data.relation
+					
+					$('#collector-relation-id').val(rel)
+					$('#di2di').prop('checked', link.data.type == 'di2di')
+					$('#hide-link').prop('checked', link.data.hide)
+				}
+			}
 			
+			function mouseUpOnNode(node, e) {
+				console.log("mouseup:"+node.id)
+				//if (pin) {
+				//	console.log('togglePin')
+				//	jHist.toggleNodePin(node.id)
+				//}
+			}
 			function mouseHoverOnNode(node, e) {
 				//console.log("mouseHoverOnNode " +node.id+" at (" + e.clientX +", " + e.clientY + ")")
 			}
@@ -78,18 +141,19 @@
 				$( "#data-collector" ).draggable();
 			}
 			
+
+			
+
+					
 			function addEventHandlers() {
 				// window resize event handler
                 $( window ).resize(function() { onWindowResize() });
 				document.body.addEventListener('keydown', function (e) {
 					if (e.which === 32) { // spacebar
-						if (jHist.isrunning()){
-							jHist.pause()
-						} else {
-							jHist.resume()
-						}
+						jHist.toggleRunState()
 					}
-				 })
+				})
+				document.body.addEventListener('dblclick', function (e) { jHist.toggleRunState() })
 
 				$('.tab').mousedown(function(e){
 					var id = $(this).prop('id')
@@ -112,7 +176,7 @@
 				
 				// install zoom hanlder
 				$('.tools').mousedown(function(e){
-					console.log("tools ")
+					//console.log("tools ")
 					e.preventDefault()
 					var delay = 20
 					zoomaction = true
@@ -138,34 +202,67 @@
 				//
 				$('.edit-type').click(function(){
 					let name = $(this).html()
-					
-					if (name == 'Modify Link') {
-						showNewLinkTool(name)
-					} else if(name == "New Data") {
-						showNewDataTool(name)
-					} else if (name == "Modify Data") {
-						showModifyDataTool(name)
-					}
+					$('#collector-type').html(name)
+					if(name==new_name) {
+						$('.mod-edge, .delete, .new-name').hide()
+						$('.mod-node, .new-node').show()
+					} else if (name == mod_data) {
+						$('.mod-edge, .new-node').hide()
+						$('.mod-node, .new-name, .delete').show()
+					} else if ([mod_link, add_link].indexOf(name) != -1) {
+						$('.mod-node, .new-node, .new-name').hide()
+						$('.mod-edge, .delete').show()
+					}					
 					$('#data-collector').show()
 					toggleConfigTool(false)
 				})
+				
+				
+				$("#pin-node").mousedown(function(){
+					if ($(this).hasClass('low')){
+						$(this).removeClass('low').addClass('high')
+						pin = true
+						//$('#toolbox').css('background-color', '#ddd').css('opacity', 1)
+					} else {
+						$(this).removeClass('high').addClass('low')
+						pin = false
+						//$('#toolbox').css('background-color', '#eee').css('opacity', 0.3)
+					}
+				})
+				
+				// sync
+				$('#collector-relation-id').change(function(){
+					let val = $(this).val()
+					if (val == 'son') {
+						$("#collector-gender-id #male").prop('checked', true)
+					} else if (['daughter', 'wife'].indexOf(val) != -1) {
+						$("#collector-gender-id #female").prop('checked', true)
+					}
+				})
+				
+				$('#collector-gender-id input').change(function(){
+					let val = $(this).val()
+					let gval = $('#collector-relation-id').val()
+					if ( ((val == 'm') && (['daughter', 'wife'].indexOf(gval) != -1)) || ((val == 'f') && (gval == 'son')) ) {
+						$('#collector-relation-id').val('')
+					} 
+				})
+				
+				$('#collector-link-id').change(function(){
+					if (glinks.length>0) {
+						let idx = $('#collector-link-id').prop('selectedIndex')
+						let link = glinks[idx]
+						var rel = link.data.relation
+						
+						$('#collector-relation-id').val(rel)
+						$('#di2di').prop('checked', link.data.type == 'di2di')
+						$('#hide-link').prop('checked', link.data.hide)
+					}
+					
+				})
+
 			}
 			
-			function showNewLinkTool(name) {
-				$('#collector-type').html(name)
-				$('.mod-node').hide()
-				$('.mod-edge').show()
-			}
-			function showNewDataTool(name) {
-				$('#collector-type').html(name)
-				$('.mod-node, .new-node').show()
-				$('.mod-edge').hide()
-			}
-			function showModifyDataTool(name) {
-				$('#collector-type').html(name)
-				$('.mod-node').show()
-				$('.mod-edge, .new-node').hide()
-			}
 			function toggleConfigTool(hide){
 				if (hide){
 					$('#config-tab').hide("slide", { direction: "right" }, 500);
@@ -176,55 +273,161 @@
 				}
 			}
 			
-			function onAdd() {
-				var linkTo = $('#collector-connect-to-id').val()
-				var name = $('#collector-name-id').val()
-				var oname = $('#collector-other-name-id').val()
-				var gender =  $("#collector-gender-id input:radio[name ='gender']:checked").val();
-				var diwang = $('#collector-di-wang-id').is(':checked')
-				var relation = $('#collector-relation-id').val()
-	
-				function sanity(val, msg) {
-					if (!val) {
-						alert(msg)
-						return false
-					}
-					return true
+			function sanity(val, msg) {
+				if (!val) {
+					alert(msg)
+					return false
 				}
-				
-				var ok = sanity(linkTo, "connect-to is missing")
-				if (ok) { ok = sanity(name, "name is missing")}
-				if (ok) {
-					// the node
-					var node = {'id' : name}
-					if (gender == 'f') {
-						node.gender = gender
+				return true
+			}
+					
+			function onModify() {
+				var type = $('#collector-type').html()
+				if (type == new_name ) {
+					let linkTo = $('#collector-connect-to-id').val()
+					let name = $('#collector-name-id').val()
+					let oname = $('#collector-other-name-id').val()
+					let gender =  $("#collector-gender-id input:radio[name ='gender']:checked").val();
+					let diwang = $('#collector-di-wang-id').is(':checked')
+					let relation = $('#collector-relation-id').val()
+					let ok = sanity(linkTo, "connect-to is missing")
+					if (ok) { ok = sanity(name, "name is missing")}
+					if (ok) {
+						// the node
+						let node = {'id' : name}
+						if (gender == 'f') {
+							node.gender = gender
+						}
+						if (oname) {
+							node.name = oname.split(/[\s,;]+/)
+						}
+						if (diwang) {
+							node.type = 'di-wang'
+						}
+						
+						// the link
+						let link = {'from': linkTo, 'to': name}
+						if (relation != "unknown") {
+							link.relation = relation
+						}
+						// link type ?
+						
+						jHist.addSingleNode(node)
+						jHist.addSingleLink(link, true)
 					}
-					if (oname) {
-						node.name = oname.split(/[\s,;]+/)
-					}
-					if (diwang) {
-						node.type = 'di-wang'
+				} else if (type == mod_data) {
+					
+					let name = $("#collector-name-id").val()
+					let node = jHist.getNode(name)
+					
+					// remember state and pause
+					let running = jHist.isrunning()
+					if (running) {
+						jHist.pause()
 					}
 					
-					// the link
-					var link = {'from': linkTo, 'to': name}
-					if (relation != "unknown") {
-						link.relation = relation
-					}
-					// link type ?
+					//remember position and links:
+					var links = jQuery.extend(true, {}, node.links)
+					let pos = jHist.getNodePosition(node.id)
+					let x = pos.x
+					let y = pos.y
 					
-					jHist.addSingleNode(node)
-					jHist.addSingleLink(link, true)
-					//console.log(node)
-					//console.log(link)
+					// remove the node
+					jHist.removeNode(node.id)
+
+					if (!$('#delete').is(":checked")) {
+						name = $("#collector-new-name-id").val()
+						let oname = $("#collector-other-name-id").val()
+						let gender = $("#collector-gender-id input:radio[name ='gender']:checked").val();
+						let diwang = $('#collector-di-wang-id').is(':checked')
+						let data = {'id': name}
+						if (gender == 'f'){
+							data.gender = 'f'
+						}
+						if (diwang) {
+							data.type = 'di-wang'
+						}
+						if (oname) {
+							data.name = oname.split(/[\s,;]+/)
+						}
+						//console.dir(links)
+						jHist.addSingleNode(data)
+						jHist.moveNodeTo(data.id, x, y)
+						//console.log('add links back : '  + links.length)
+						for (let n in links) {
+							let link = links[n].data
+							if (link.from == node.id) {
+								link.from = name
+							}
+							if (link.to == node.id) {
+								link.to = name
+							}
+							
+							jHist.addSingleLink(links[n].data)
+						}
+					}
+					
+					if (running) {
+						jHist.resume()
+					}
+					
+				} else if ([mod_link, add_link].indexOf(type) != -1) {
+					
+					let fromid = $("#from-node-id").val()
+					let toid = $("#to-node-id").val()
+					
+					if (!fromid || !toid) {
+						alert('Need both from and to nodes')
+					} else {
+						
+						var rel = $('#collector-relation-id').val()
+						var data = null
+						var idx = -1
+						
+						if (glinks.length > 0) {
+							let idx = $('#collector-link-id').prop('selectedIndex')
+							link = glinks[idx]
+							rel = link.data.relation
+							data = link.data
+							if (type == mod_link) {
+								jHist.graph.removeLink(link)
+							}
+						}
+						
+						if (!$('#delete').is(":checked")) {
+							if (!data) {
+								data = {'from': fromid, 'to' : toid}
+							} else {
+								delete data.relation
+								delete data.timelength
+								delete data.type
+							}
+							
+							if ($('#di2di').is(':checked')){
+								data.type = "di2di"
+							} else if (rel) {
+								data.relation = rel
+							}
+							
+							if ($('#hide-link').is(':checked')){
+								data.hide = 'true'
+							} else {
+								delete(data.hide)
+							}
+							
+							jHist.addSingleLink(data)						
+						}
+						updateModLinkUI()
+						jHist.rerender()
+					}
+				} else {
+					console.log('not supported : ' + type)
 				}
 
 			}
 			
-			function fetch_json() {
+			function fetch_json(file) {
 				console.log('fetch file...')
-				var file = '/data/shang_gu.json'
 				$.ajax({
 					dataType: "json",
 					async: true,
@@ -233,7 +436,8 @@
 						jHist.addNodes(response.nodes)
 						
 						// pin "黄帝"
-						jHist.pinNode("黄帝", true)
+						//jHist.pinNode("黄帝", true)
+						jHist.toggleNodePin("黄帝")
 						//let pinNode = jHist.graph.getNode("黄帝")
 						////pinNode.isPinned = true
 						//jHist.layout.pinNode(pinNode, true);
@@ -300,10 +504,10 @@
 			
 			#data-collector {
 				position : fixed;
-				top : 100px;
-				left : 10px;
+				top : 150px;
+				right : 10px;
 				font-size: 12px;
-				width: auto;
+				width: 250px;
 	
 				background-color: #bbb;
 				z-index: 100;
@@ -326,7 +530,7 @@
 			
 			#config {
 				position : fixed;
-				top : 100px;
+				top : 10px;
 				right : 10px;
 				
 				background-color: #999;
@@ -375,6 +579,7 @@
     <body oncontextmenu="return false;">
 		<div id="graphContainer" style="background-color: #fff; "></div>
 		<img id="help-tab" class="tab left-tab" src="/images/info20x20.png" title="help info"> </img>
+		<!--i id="help-tab" class="tab left-tab" class="fa fa-comment-o" aria-hidden="true"></i-->
 		<span id="usage">
 			<span class="dismiss-container"><img id="dismiss-usage" class="dismiss" src="/images/arrow_left20x20.png" title="hide help info"></img></span>
 			<ul class="">
@@ -386,13 +591,17 @@
 				</li>
 			</ul>
 		</span>
-				
+			
+		<!--i id="config-tab" class="tab right-tab" class="fa fa-cogs" aria-hidden="true" title="configuration"></i-->
+		
 		<img id="config-tab" class="tab right-tab" src="/images/config20x20.png" title="configuration"></img>
+		
 
 		<table id="config" class="control"></table>
 
 		<!-- size control -->
 		<table id="toolbox">
+			<tr><td id="pin-node" class="toolcell low"><i class="fa fa-map-marker fa-1g" aria-hidden="true"></i></td></tr>
 			<tr>
 				<td class="toolcell"><img id="zone-select" class="tools zone-select" src="/images/select40x40.png" style="width:20px; height: 20px" title="select"></img></td>
 			</tr>
@@ -415,22 +624,26 @@
 					<td style="text-align: right"><i class="fa fa-times fa-1g" aria-hidden="true" title="close" onclick="$('#data-collector').hide()"></i></td>
 				</tr>
 			</table> 
-			<table id="mod-node" class="mod">
-				<tr class="new-node mod-node">
+			<table id="edit" class="edit">
+				<tr class="new-node">
 					<td>Connect to:</td>
-					<td><input id="collector-connect-to-id" type=text></td>
+					<td colspan=2><input id="collector-connect-to-id" type=text></td>
 				</tr>
 				<tr class="mod-node">
 					<td>Name:</td>
-					<td><input id="collector-name-id" type="text"></td>
+					<td colspan=2><input id="collector-name-id" type="text"></td>
+				</tr>
+				<tr class="new-name">
+					<td>New Name:</td>
+					<td colspan=2><input id="collector-new-name-id" type="text"></td>
 				</tr>
 				<tr class="mod-node">
 					<td>Other names:</td>
-					<td><input id="collector-other-name-id" type="text"></td>
+					<td colspan=2><input id="collector-other-name-id" type="text"></td>
 				</tr>
 				<tr class="mod-node">
 					<td>Gender:</td>
-					<td id="collector-gender-id" >Male
+					<td id="collector-gender-id" colspan=2>Male
 						<input type="radio" id="male" name="gender" checked="checked" value='m'> &nbsp; &nbsp; Female
 						<input type="radio" id="female" name="gender" value='f'>
 					</td>
@@ -441,34 +654,42 @@
 				</tr>
 				
 				<tr class="mod-edge">
-					<td>Node 1:</td>
-					<td><input id="collector-link-node-1" type=text></td>
+					<td>From:</td>
+					<td colspan=2><input id="from-node-id" type=text></td>
 				</tr>
 				<tr class="mod-edge">
-					<td>Node 2:</td>
-					<td><input id="collector-link-node-2" type="text"></td>
+					<td>To:</td>
+					<td colspan=2><input id="to-node-id" type="text"></td>
 				</tr>
 
-				<tr class="new-node">
+				<tr class="mod-edge">
+					<td>link:</td>
+					<td colspan=2>
+						<select id="collector-link-id" style="width: 100%">
+						</select>
+					</td>
+				</tr>
+				
+				<tr class="new-node mod-edge">
 					<td>Relation:</td>
 					<td>
 						<select id="collector-relation-id" >
+							<option></option>
 							<option>unknown</option>
 							<option>son</option>
 							<option>daughter</option>
 							<option>wife</option>
-							<option>di2di</option>
 						</select>
 					</td>
+					<td>帝2帝<input id="di2di" type="checkbox">Hide<input id="hide-link" type="checkbox"></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td> <span class="delete">Delete : <input id="delete" type='checkbox' value="delete"></span></td>
+					<td style="text-align: right"><i id="on-add" class="fa fa-check" aria-hidden="true" style="cursor: pointer" onclick="onModify()"></i></td>
 				</tr>
 			</table>
 			
-			<table class="mod">
-				<tr>
-					<tr></tr>
-					<td style="text-align: right"><i class="fa fa-check" aria-hidden="true" onclick="onAdd()"></i></td>
-				</tr>
-			</table>
 		</div>
 
 		
