@@ -135,32 +135,44 @@
 		// make start and end points of link at outside center of the node image box
 		let toNodeSize = nodeSize,
 			fromNodeSize = nodeSize;
+		let halfFNS = fromNodeSize / 2
+		let halfTNS = toNodeSize / 2
 		
 		let from = geom.intersectRect(
 				// rectangle:
-						fromPos.x - fromNodeSize / 2, // left
-						fromPos.y - fromNodeSize / 2, // top
-						fromPos.x + fromNodeSize / 2, // right
-						fromPos.y + fromNodeSize / 2, // bottom
+						fromPos.x - halfFNS, // left
+						fromPos.y - halfFNS, // top
+						fromPos.x + halfFNS, // right
+						fromPos.y + halfFNS, // bottom
 				// segment:
 						fromPos.x, fromPos.y, toPos.x, toPos.y)
 				   || fromPos; // if no intersection found - return center of the node
 
 		let to = geom.intersectRect(
 				// rectangle:
-						toPos.x - toNodeSize / 2, // left
-						toPos.y - toNodeSize / 2, // top
-						toPos.x + toNodeSize / 2, // right
-						toPos.y + toNodeSize / 2, // bottom
+						toPos.x - halfTNS, // left
+						toPos.y - halfTNS, // top
+						toPos.x + halfTNS, // right
+						toPos.y + halfTNS, // bottom
 				// segment:
 						toPos.x, toPos.y, fromPos.x, fromPos.y)
 					|| toPos; // if no intersection found - return center of the node
 
 
 		if (linkUI.link.data.type == "di2di") {	//di2di
+			let fsize = fromNodeSize * 0.8
+			let tsize = toNodeSize * 0.8
+			let from2 = geom.intersectRect(fromPos.x - fsize, fromPos.y - fsize, fromPos.x + fsize, fromPos.y + fsize, fromPos.x, fromPos.y, toPos.x, toPos.y)
+					   || fromPos; 
+	
+			let to2 = geom.intersectRect(toPos.x - tsize, toPos.y - tsize, toPos.x + tsize, toPos.y + tsize, toPos.x, toPos.y, fromPos.x, fromPos.y)
+						|| toPos; // if no intersection found - return center of the node
+			data = 'M' + from2.x + ',' + from2.y + 'L' + to2.x + ',' + to2.y;
+		/*
 			data = 'M' + from.x + ',' + from.y + 'L' + to.x + ',' + (to.y + toNodeSize / 4);
 		} else if (linkUI.link.data.relation == "son" || linkUI.link.data.relation =="daughter" ){
 			data = 'M' + from.x + ',' + from.y + 'L' + to.x + ',' + (to.y - toNodeSize / 4);
+		*/
 		} else {
 			data = 'M' + from.x + ',' + from.y + 'L' + to.x + ',' + to.y;
 		}
