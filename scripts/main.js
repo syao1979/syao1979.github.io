@@ -56,6 +56,9 @@
 	
 	function nodeBehave(node) {
 		//console.log(node.id)
+		if (!node.data) {
+			console.dir(node)
+		}
 		let imgURL = imgurl(node.data.type, node.data.gender)		
 		if (node.data.image && node.data.image != "") {
 			imgURL = node.data.image
@@ -280,19 +283,21 @@
 				}
 			},
 			
-		addSingleLink : function(link, draw){
-			if (link.type != "di2di") {
-				if (!link.timelength) {
-					link.timelength=10
-					if (link.relation == 'wife') {
-						link.timelength=4
+		addSingleLink : function(data, draw){
+			if (data.type != "di2di") {
+				if (!data.timelength) {
+					data.timelength=10
+					if (data.relation == 'wife') {
+						data.timelength=4
 					}
 				}
-				this.graph.addLink(link.from, link.to, link)
+				//console.log('addSingleLink : ' + JSON.stringify(data))
+				this.graph.addLink(data.from, data.to, data)
 				
 			} else {
-				link.timelength = 4
-				this.graph.addLink(link.from, link.to, link)
+				data.timelength = 4
+				//console.log('addSingleLink : ' + JSON.stringify(data))
+				this.graph.addLink(data.from, data.to, data)
 			}
 			
 			if (draw) {

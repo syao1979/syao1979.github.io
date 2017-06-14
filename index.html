@@ -12,12 +12,12 @@
         
 		<script src="https://use.fontawesome.com/ed433a365e.js"></script>
         <script type='text/javascript'>
-			var new_name = "New Data"
+			var new_data = "New Data"
 			var mod_data = "Modify Data"
 			var mod_link = "Modify Link"
 			var add_link = "Add Link"
 			var CONF_STR = {
-				'new name' : new_name,
+				'new name' : new_data,
 				'mod data' : mod_data,
 				'mod link' : mod_link,
 				'add link' : add_link,
@@ -60,7 +60,7 @@
 				if ($('#data-collector').is(':visible')) {
 					var name = $('#collector-type').html()
 					
-					if ( name == new_name ){
+					if ( name == new_data ){
 						console.log(name)
 						$('#collector-connect-to-id').val(node.id)
 					} else if ( name == mod_data ) {
@@ -147,11 +147,17 @@
 
 			
 			function syncRelation() {
-				if ($('#di2di').is(':checked')){
-					$('#collector-relation-id').val('').prop('disabled', true)
+				var name = $('#collector-type').html()
+				if(name!=new_data) {
+					if ($('#di2di').is(':checked')){
+						$('#collector-relation-id').prop('selectedIndex', 0).prop('disabled', true)
+					} else {
+						$('#collector-relation-id').prop('disabled', false)
+					}
 				} else {
 					$('#collector-relation-id').prop('disabled', false)
 				}
+				
 			}
 					
 			function addEventHandlers() {
@@ -211,8 +217,9 @@
 				//
 				$('.edit-type').click(function(){
 					let name = $(this).html()
+					syncRelation()
 					$('#collector-type').html(name)
-					if(name==new_name) {
+					if(name==new_data) {
 						$('.mod-edge, .delete, .new-name').hide()
 						$('.mod-node, .new-node, .flip').show()
 					} else if (name == mod_data) {
@@ -222,6 +229,7 @@
 						$('.mod-node, .new-node, .new-name, .flip').hide()
 						$('.mod-edge, .delete').show()
 						if (name == add_link) {
+							$('.link-id').hide()
 							$('.delete').hide()
 						}
 					}					
@@ -256,7 +264,7 @@
 					let val = $(this).val()
 					let gval = $('#collector-relation-id').val()
 					if ( ((val == 'm') && (['daughter', 'wife'].indexOf(gval) != -1)) || ((val == 'f') && (gval == 'son')) ) {
-						$('#collector-relation-id').val('')
+						$('#collector-relation-id').prop('selectedIndex', 0)
 					} 
 				})
 				
@@ -300,7 +308,7 @@
 					
 			function onModify() {
 				var type = $('#collector-type').html()
-				if (type == new_name ) {
+				if (type == new_data ) {
 					let linkTo = $('#collector-connect-to-id').val()
 					let name = $('#collector-name-id').val()
 					let oname = $('#collector-other-name-id').val()
@@ -325,15 +333,20 @@
 							node.type = 'di-wang'
 						}
 						
-						// the link
-						let link = {'from': linkTo, 'to': name}
-						if (relation != "unknown") {
-							link.relation = relation
-						}
-						// link type ?
-
 						jHist.addSingleNode(node)
-						jHist.addSingleLink(link, true)
+						
+						// the link
+						var data = {'from': linkTo, 'to': name}
+						if (relation != "unknown") {
+							data.relation = relation
+							jHist.addSingleLink(data, true)
+						}
+						
+						if ($('#di2di').is(':checked')){
+							data = {'from': linkTo, 'to': name, 'type': 'di2di'}
+							jHist.addSingleLink(data, true)
+						}
+
 						$("#flip").removeClass('fa-level-down').addClass("fa-level-up")
 					}
 				} else if (type == mod_data) {
@@ -402,32 +415,26 @@
 					} else {
 						
 						var rel = $('#collector-relation-id').val()
-						var data = null
+						//var data = null
 						var idx = -1
 						
 						if (glinks.length > 0) {
 							let idx = $('#collector-link-id').prop('selectedIndex')
 							link = glinks[idx]
-							rel = link.data.relation
-							data = link.data
+							//rel = link.data.relation
+							//data = link.data
 							if (type == mod_link) {
 								jHist.graph.removeLink(link)
 							}
 						}
 						
 						if (!$('#delete').is(":checked")) {
-							if (!data) {
-								data = {'from': fromid, 'to' : toid}
-							} else {
-								delete data.relation
-								delete data.timelength
-								delete data.type
-							}
-							
+							let data = {'from': fromid, 'to' : toid}
+
 							if ($('#di2di').is(':checked')){
 								data.type = "di2di"
-							} else if (rel) {
-								data.relation = rel
+							} else if ($('#collector-relation-id').val()) {
+								data.relation = $('#collector-relation-id').val()
 							}
 							
 							if ($('#hide-link').is(':checked')){
@@ -697,7 +704,7 @@
 					<td colspan=2><input id="to-node-id" type="text"></td>
 				</tr>
 
-				<tr class="mod-edge">
+				<tr class="mod-edge link-id">
 					<td>link:</td>
 					<td colspan=2>
 						<select id="collector-link-id" style="width: 100%">
@@ -709,7 +716,6 @@
 					<td>Relation:</td>
 					<td>
 						<select id="collector-relation-id" >
-							<option></option>
 							<option>unknown</option>
 							<option>son</option>
 							<option>daughter</option>
