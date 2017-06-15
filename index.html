@@ -16,6 +16,7 @@
 			var mod_data = "Modify Data"
 			var mod_link = "Modify Link"
 			var add_link = "Add Link"
+			var rootNode = null
 			var CONF_STR = {
 				'new name' : new_data,
 				'mod data' : mod_data,
@@ -140,11 +141,9 @@
 				//console.log("mouseHoverOnNode " +node.id+" at (" + e.clientX +", " + e.clientY + ")")
 			}
 			
-			function  initui(){
+			function initui(){
 				$( "#data-collector" ).draggable();
 			}
-			
-
 			
 			function syncRelation() {
 				var name = $('#collector-type').html()
@@ -218,7 +217,13 @@
 				$('.edit-type').click(function(){
 					let name = $(this).html()
 					syncRelation()
+					if (rootNode != null) {
+						jHist.toggleNodePin(rootNode)
+						rootNode = null
+					}
+					
 					$('#collector-type').html(name)
+					$('#delete').prop("checked", false)
 					if(name==new_data) {
 						$('.mod-edge, .delete, .new-name').hide()
 						$('.mod-node, .new-node, .flip').show()
@@ -290,6 +295,11 @@
 			
 			function toggleConfigTool(hide){
 				if (hide){
+					if (rootNode != null) {
+						jHist.toggleNodePin(rootNode)
+						rootNode = null
+					}
+					
 					$('#config-tab').hide("slide", { direction: "right" }, 500);
 					$('#config').show("slide", { direction: "right" }, 500);
 				} else {
@@ -318,6 +328,11 @@
 					let ok = sanity(linkTo, "connect-to is missing")
 					if (ok) { ok = sanity(name, "name is missing")}
 					if (ok) {
+						if (rootNode != null) {
+							jHist.toggleNodePin(rootNode)
+						}
+						rootNode = linkTo
+						jHist.toggleNodePin(rootNode)
 						// the node
 						let node = {'id' : name}
 						if ($("#flip").hasClass('fa-level-down')) {
@@ -421,8 +436,6 @@
 						if (glinks.length > 0) {
 							let idx = $('#collector-link-id').prop('selectedIndex')
 							link = glinks[idx]
-							//rel = link.data.relation
-							//data = link.data
 							if (type == mod_link) {
 								jHist.graph.removeLink(link)
 							}
@@ -439,10 +452,9 @@
 							
 							if ($('#hide-link').is(':checked')){
 								data.hide = 'true'
-							} else {
-								delete(data.hide)
-							}
+							} 
 							
+							console.log("Add link : " + JSON.stringify(data))
 							jHist.addSingleLink(data)						
 						}
 						updateModLinkUI()
