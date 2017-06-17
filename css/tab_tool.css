@@ -39,7 +39,7 @@
 	border-radius : 4px;
 }
 .dismiss-container:hover{
-	background-color : #bbb;
+	background-color : #aaa;
 }
 
 #usage{
@@ -56,7 +56,7 @@
 	position:fixed;
 
 	display:none;
-	background-color: #fff;
+	background-color: #eee;
 	padding: 2px;
 	opacity: 0.3;
 	z-index: 10;
@@ -84,6 +84,7 @@
 	border-radius : 6px;
 }
 #usage:hover, #config:hover, #dismiss-usage:hover {
+	/*background-color: #999;*/ 
 	opacity: 1;
 }
 

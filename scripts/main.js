@@ -224,7 +224,7 @@
 			"nodeSize" : 15,
 			"springLength" : 10,        // view layout setting
 			"springCoeff" : 0.0028,     // same
-			"gravity" : -22,           // same
+			"gravity" : -12,           // same
 			"theta" : 0.8,              // same
 			"dragCoeff" : 0.02,         // same
 			"timeStep" : 20,            // same
@@ -363,7 +363,7 @@
 											nui.position.x=x; nui.position.y=y;
 											this.renderer.rerender(); return this },
 		toggleRunState : function(){ if (this.animation){ this.pause() } else { this.resume() }; return this },
-		toggleNodePin : function(node_id) {let n = this.graph.getNode(node_id); this.layout.pinNode(n, !n.pin); n.pin = !n.pin; return this },
+		toggleNodePin : function(node_id) {let n = this.graph.getNode(node_id); if (n){this.layout.pinNode(n, !n.pin); n.pin = !n.pin}; return this },
 		getLinks : function(from_id, to_id){
 			let node = this.graph.getNode(from_id)
 			let links = []
