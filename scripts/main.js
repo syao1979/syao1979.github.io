@@ -86,9 +86,9 @@
 		$(ui).hover(function() { // mouse over
 			var title = node.data.id
 			if(node.data.name){
-				$(document.body).attr('title', node.data.name)
+				title += ',' + node.data.name
             } 
-			$(document.body).attr('title', node.data.id)
+			$(document.body).attr('title', title)
 			
         }, function() { // mouse out
 			$(document.body).removeAttr('title', node.data.name)
