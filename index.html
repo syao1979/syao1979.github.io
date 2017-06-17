@@ -3,20 +3,27 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>帝王世系</title>
-		<link href='css/tab_tool.css' rel='stylesheet' type="text/css">
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-		<script src="scripts/jquery-ui.js"></script>
-        <script src="scripts/vivagraph.js"></script>
-		<script src="scripts/main.js"></script>
+		<link rel='stylesheet' type="text/css" href='css/tab_tool.css'>
+		<link rel='stylesheet' type="text/css" href='css/jquery.qtip.min.css'>
+		<link rel='stylesheet' type="text/css" href='css/tab_tool.css'>
+		
+		<script type="text/javascript" src="scripts/jquery-3.2.1.min.js"></script>
+		<script type="text/javascript" src="scripts/jquery-ui.js"></script>
+		<script type="text/javascript" src="scripts/jquery.qtip.min.js"></script>
+        <script type="text/javascript" src="scripts/vivagraph.js"></script>
+		<script type="text/javascript" src="scripts/main.js"></script>
 		<!-- script src="scripts/utils.js"></script -->
         
-		<script src="https://use.fontawesome.com/ed433a365e.js"></script>
+		<!-- script src="https://use.fontawesome.com/ed433a365e.js"></script -->
+		<link rel="stylesheet" type="text/css" href="css/font-awesome-4.7.0/css/font-awesome.min.css">
         <script type='text/javascript'>
 			var new_data = "New Data"
 			var mod_data = "Modify Data"
 			var mod_link = "Modify Link"
 			var add_link = "Add Link"
 			var rootNode = null
+			var zoomaction = false
+			
 			var CONF_STR = {
 				'new name' : new_data,
 				'mod data' : mod_data,
@@ -207,9 +214,13 @@
 						})()
 						return false
 					} else if ($(this).hasClass('zoomfit')){
-						fitScreen()
+						jHist.fitScreen()
 					}
 				})
+				$('.tools').mouseup(function(){
+					zoomaction = false
+					return false;
+				});
 				
 				//
 				$('.edit-type').click(function(){
@@ -509,44 +520,11 @@
             
 			function onWindowResize(){
 				if (dataReady) {
-					jHist.renderer.reset()
+					jHist.fitScreen()
 				}
 			}
 			
-			// zoom down universe to screen size
-			function fitScreen(){
-				renderer.reset()
-				//renderer.moveTo(0,0)
-				targetscale = desiredScale()
-				let running = inrun
-				if (running){
-					renderer.pause()
-				}
-				zoomFit(targetscale, 1, running);
-			}
 
-			function desiredScale(){
-				var graphRect = layout.getGraphRect();
-				var graphSize = Math.min(graphRect.x2 - graphRect.x1, graphRect.y2 - graphRect.y1);
-				var screenSize = Math.min($("#viewport").width(), $("#viewport").height());
-				var scalefactor = 0.9 // practival observation tells we need to overshut a little
-				return (screenSize / graphSize) * scalefactor;
-			}
-	
-			function zoomFit(targetScale, currentScale, running) {
-				renderer.rerender()
-				if (targetScale < currentScale) {
-					currentScale = renderer.zoomOut();
-	
-					setTimeout(function () {
-						zoomFit(targetScale, currentScale, running);
-					}, 15);
-				} else {
-					if (running){
-						renderer.resume()
-					}
-				}
-			}
 		</script>
 
 		
@@ -683,19 +661,21 @@
 
 		<!-- size control -->
 		<table id="toolbox">
-			<tr><td id="pin-node" class="toolcell low"><i class="fa fa-thumb-tack fa-2g" aria-hidden="true"></i></td></tr>
-			<tr>
+			<tr><td id="pin-node" class="toolcell low" title="pin node"><i class="fa fa-thumb-tack fa-2x" aria-hidden="true"></i></td></tr>
+			<!-- tr>
 				<td class="toolcell"><img id="zone-select" class="tools zone-select" src="/images/select40x40.png" style="width:20px; height: 20px" title="select"></img></td>
-			</tr>
+			</tr -->
 			<tr></tr>
 			<tr>
-				<td class="toolcell"><img id="size-fit" class="tools zoomfit" src="/images/fit20x20.png" title="fit screen"></img></td>
+				<td class="toolcell" title="fit screen"><i id="size-fit" class="fa fa-compress tools zoomfit fa-2x" aria-hidden="true"></i></td>
 			</tr>
 			<tr>
-				<td class="toolcell"><img id="size-fit" class="tools zoomin" src="/images/plus20x20.png" title="zoom in"></img></td>
+				<!--td class="toolcell"><img id="size-fit" class="tools zoomin" src="/images/plus20x20.png" title="zoom in"></img></td-->
+				<td class="toolcell" title="zoom in"><i id="size-fit" class="fa fa-search-plus tools zoomin fa-2x" aria-hidden="true"></i></td>
+				
 			</tr>
 			<tr>
-				<td class="toolcell"><img id="size-fit" class="tools zoomout" src="/images/minus20x20.png" title="zoom out"></img></td>
+				<td class="toolcell" title="zoom out"><i id="size-fit" class="fa fa-search-minus tools zoomout fa-2x" aria-hidden="true"></i></td>
 			</tr>
 		</table>
 		

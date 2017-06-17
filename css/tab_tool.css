@@ -2,7 +2,7 @@
 	position : fixed;
 	height : 26px;
 	width : 26px;
-	top : 10px;
+	top : 20px;
 	background-color: #eee;
 
 	padding: 4px;
@@ -45,13 +45,13 @@
 #usage{
 	text-align: left;
 	color: #666;
-	left: 10px;
+	/*left: 10px;*/
 	font-size: 12px;
 	font-family: Verdana;
 	font-weight: bold;
 
 	left:0px;
-	top:10px;
+	top:0px;
 	width:auto;
 	position:fixed;
 

@@ -51,6 +51,7 @@
 				imgURL = '/images/woman.png'
 			}
 		}
+	
 		return imgURL
 	}
 	
@@ -66,14 +67,14 @@
 		
 		// This time it's a group of elements: http://www.w3.org/TR/SVG/struct.html#Groups
 		var ntxt = node.data.id
-		if (node.data.name) {
-			let nlist = [node.data.id]
-			for(let n=0; n<node.data.name.length; n++){
-				nlist.push(node.data.name[n]);
-			}
-			
-			ntxt = nlist
-		}
+		//if (node.data.name) {
+		//	let nlist = [node.data.id]
+		//	for(let n=0; n<node.data.name.length; n++){
+		//		nlist.push(node.data.name[n]);
+		//	}
+		//	ntxt = nlist
+		//}
+		
 		var ui = Viva.Graph.svg('g'), // Create SVG text element with user name as content
 			svgText = Viva.Graph.svg('text').attr('y', '-4px').text(ntxt),
 			img = Viva.Graph.svg('image').attr('width', nodeSize).attr('height', nodeSize).link(imgURL);
@@ -81,6 +82,18 @@
 		ui.append(svgText);
 		ui.append(img);
 				
+		// default mouse event:
+		$(ui).hover(function() { // mouse over
+			var title = node.data.id
+			if(node.data.name){
+				$(document.body).attr('title', node.data.name)
+            } 
+			$(document.body).attr('title', node.data.id)
+			
+        }, function() { // mouse out
+			$(document.body).removeAttr('title', node.data.name)
+        });
+						
 		// go through registered callbacks
 		Object.keys(callbacks).forEach(
 			function(callbacktype) {
@@ -112,7 +125,7 @@
 		//console.dir(ui)
 		if(link.data.relation == 'wife') {
 			ui.attr('stroke', 'pink').attr('stroke-dasharray', '2, 2')
-		} else if (link.data.relation == 'son') {
+		} else if (link.data.relation == 'son' || link.data.relation == 'daughter') {
 			ui.attr('stroke', 'red').attr('stroke-dasharray', '2, 2').attr('marker-end', 'url(#Triangle)');
 		} else if (link.data.type == "di2di") {
 			ui.attr('stroke', 'blue')
@@ -193,7 +206,7 @@
 		var graphRect = layout.getGraphRect();
 		var graphSize = Math.min(graphRect.x2 - graphRect.x1, graphRect.y2 - graphRect.y1);
 		var screenSize = Math.min($(viewObj).width(), $(viewObj).height());
-		//var scalefactor = 0.9 // practival observation tells we need to overshut a little
+		var scalefactor = 0.9 // practival observation tells we need to overshut a little
 		return (screenSize / graphSize) * scalefactor;
 	}
 	function getGraphRectCenter(layout) {
@@ -227,7 +240,7 @@
 			"gravity" : -12,           // same
 			"theta" : 0.8,              // same
 			"dragCoeff" : 0.02,         // same
-			"timeStep" : 20,            // same
+			"timeStep" : 50,            // same
 		}
 	}
 	
@@ -274,6 +287,7 @@
 			this.renderer.run();
 			this.animation = true
 			//this.renderer.pause()
+			
 		},
 		addSingleNode : function(node){ this.graph.addNode(node.id, node); this.renderer.rerender() },
 		addNodes : function addNodes(nodes) {
@@ -374,6 +388,32 @@
 			}
 			return links
 		},
+		
+		zoomFit : function(targetScale, currentScale, running) {
+            this.renderer.rerender()
+            if (targetScale < currentScale) {
+                currentScale = this.renderer.zoomOut();
+
+                setTimeout( ()=>{
+                    this.zoomFit(targetScale, currentScale, running);
+                }, 15);
+            } else {
+                if (this.animation){
+                    this.renderer.resume()
+                }
+            }
+        },
+
+        fitScreen : function(){
+            //this.renderer.reset()
+            //renderer.moveTo(0,0)
+            let targetscale = this.desiredScale()
+            let running = this.inrun
+            if (running){
+                this.renderer.pause()
+            }
+            this.zoomFit(targetscale, 1, running);
+        },
 	}
 	 
     // Create a jMol object and put it i global scope
