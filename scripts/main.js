@@ -87,7 +87,32 @@
 			var title = node.data.id
 			if(node.data.name){
 				title += ',' + node.data.name
-            } 
+            }
+			if (node.data.note) {
+				title += ': ' + node.data.note
+			}
+			if (node.data.startyear) {
+				title += "; 在位 "
+				if (node.data.endyear) {
+					title += node.data.endyear - node.data.startyear + 1
+					title += "年"
+				}
+				title += "（"
+				if (node.data.startyear<0) {
+					title += "前 "
+				}
+				title += Math.abs(node.data.startyear)
+				title += "-"
+				if (node.data.endyear){
+					if (node.data.endyear<0) {
+						title += "前 "
+					}
+					title += Math.abs(node.data.endyear)
+				} else {
+					title += "?"
+				}
+				title += ")"
+			}
 			$(document.body).attr('title', title)
 			
         }, function() { // mouse out
@@ -266,6 +291,7 @@
 					//console.dir(spring)
 					//console.dir(link.data)
                     spring.length = this.VIEW_PARAM['springLength'] * link.data.timelength;
+					
 					if (link.data.type == "di2di") {
 						spring.weight = 0.1
 					}
@@ -298,22 +324,27 @@
 			},
 			
 		addSingleLink : function(data, draw){
-			if (data.type != "di2di") {
-				if (!data.timelength) {
-					data.timelength=10
-					if (data.relation == 'wife') {
-						data.timelength=4
-					}
+			var fromN = this.graph.getNode(data.from)
+			var toN = this.graph.getNode(data.to)
+			var timeL = 4
+			if (fromN.data.startyear) {
+				if (fromN.data.endyear){
+					timeL = (parseInt(fromN.data.endyear) - parseInt(fromN.data.startyear)) + 1
+				} else if (toN.data.startyear) {
+					timeL = parseInt(toN.data.startyear) - parseInt(fromN.data.startyear)
 				}
-				//console.log('addSingleLink : ' + JSON.stringify(data))
-				this.graph.addLink(data.from, data.to, data)
-				
-			} else {
-				data.timelength = 4
-				//console.log('addSingleLink : ' + JSON.stringify(data))
-				this.graph.addLink(data.from, data.to, data)
+				timeL *= 0.25
+			} else if (data.type != "di2di") {
+				timeL=10
+			} 
+			if (data.relation == 'wife') {
+				timeL=4
 			}
-			
+			if (timeL < 4) {
+				timeL = 4
+			}
+			data.timelength = timeL
+			this.graph.addLink(data.from, data.to, data)
 			if (draw) {
 				this.renderer.rerender()
 			}

@@ -6,15 +6,14 @@
 		<link rel='stylesheet' type="text/css" href='css/tab_tool.css'>
 		<link rel='stylesheet' type="text/css" href='css/jquery.qtip.min.css'>
 		<link rel='stylesheet' type="text/css" href='css/tab_tool.css'>
+		<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 		
 		<script type="text/javascript" src="scripts/jquery-3.2.1.min.js"></script>
-		<script type="text/javascript" src="scripts/jquery-ui.js"></script>
+		<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 		<script type="text/javascript" src="scripts/jquery.qtip.min.js"></script>
         <script type="text/javascript" src="scripts/vivagraph.js"></script>
 		<script type="text/javascript" src="scripts/main.js"></script>
-		<!-- script src="scripts/utils.js"></script -->
-        
-		<!-- script src="https://use.fontawesome.com/ed433a365e.js"></script -->
+
 		<link rel="stylesheet" type="text/css" href="css/font-awesome-4.7.0/css/font-awesome.min.css">
         <script type='text/javascript'>
 			var new_data = "New Data"
@@ -37,6 +36,20 @@
 			var jsonfile = '/data/shang_gu2.json'
 			
             $(function() {
+				// init dialog
+				$("#data-dialog").dialog({
+					autoOpen: false,
+					resizable: true, // prevent resize of the dialog
+					height:450, // set the height to 150px
+					width: 600,
+					modal: true, // show a modal overlay in background
+					buttons: {
+						OK: function() {
+							$( this ).dialog( "close" );
+						}
+					}
+				});
+
                 dataReady = true
 				buildConfigPanel()
 				
@@ -51,6 +64,13 @@
 				addEventHandlers()
             })
 			
+			function show_dialog(txt, title){
+				$('#dialog-txt').html(txt)
+				$('#data-dialog').parent().find('.ui-dialog-title').html(title)
+				$("#data-dialog").dialog("open");
+				//$("#data-dialog").parent().css('top', $(window).scrollTop())
+			}
+
 			function buildConfigPanel() {
 				var html = ""
 				for (var key in CONF_STR) {
@@ -75,6 +95,20 @@
 						console.log(name)
 						$("#collector-name-id").val(node.data.id)
 						$("#collector-other-name-id").val(node.data.name)
+						$("#collector-from-year-id,#collector-to-year-id,#collector-person-note-id").val("")
+						if (node.data.startyear) {
+							$("#collector-from-year-id").val(node.data.startyear)
+						}
+						if (node.data.endyear) {
+							$("#collector-to-year-id").val(node.data.endyear)
+						}
+						if (node.data.note) {
+							$("#collector-person-note-id").val(node.data.note)
+						}
+						if (node.data.link) {
+							$("#collector-link-id").val(node.data.link)
+						}
+						
 						if (node.data.gender == 'f') {
 							$("#collector-gender-id #female").prop('checked', true)
 						} else {
@@ -215,6 +249,9 @@
 						return false
 					} else if ($(this).hasClass('zoomfit')){
 						jHist.fitScreen()
+					} else if ($(this).hasClass('json')) {
+						show_dialog(JSON.stringify(jHist.toJSON()), "JSON data")
+						//$( "#data-dialog" ).dialog()
 					}
 				})
 				$('.tools').mouseup(function(){
@@ -334,6 +371,11 @@
 					let gender =  $("#collector-gender-id input:radio[name ='gender']:checked").val();
 					let diwang = $('#collector-di-wang-id').is(':checked')
 					let relation = $('#collector-relation-id').val()
+					let startYear = $("#collector-from-year-id").val() //must be int
+					let endYear = $("#collector-to-year-id").val()
+					let note = $("#collector-person-note-id").val()
+					let ref = $("#collector-ref-id").val()
+					
 					let ok = sanity(linkTo, "connect-to is missing")
 					if (ok) { ok = sanity(name, "name is missing")}
 					if (ok) {
@@ -356,7 +398,18 @@
 						if (diwang) {
 							node.type = 'di-wang'
 						}
-						
+						if (startYear) {
+							node.startyear = parseInt(startYear)
+						}
+						if (endYear) {
+							node.endyear = parseInt(endYear)
+						}
+						if (note) {
+							node.note = note
+						}
+						if (ref) {
+							node.link = ref
+						}
 						console.log("Add new node : " + JSON.stringify(node))
 						jHist.addSingleNode(node)
 						
@@ -402,6 +455,11 @@
 						let oname = $("#collector-other-name-id").val()
 						let gender = $("#collector-gender-id input:radio[name ='gender']:checked").val();
 						let diwang = $('#collector-di-wang-id').is(':checked')
+						let startYear = $("#collector-from-year-id").val() //must be int
+						let endYear = $("#collector-to-year-id").val()
+						let note = $("#collector-person-note-id").val()
+						let ref = $("#collector-ref-id").val()
+					
 						let data = {'id': name}
 						if (gender == 'f'){
 							data.gender = 'f'
@@ -411,6 +469,18 @@
 						}
 						if (oname) {
 							data.name = oname.split(/[\s,;]+/)
+						}
+						if (startYear) {
+							data.startyear = parseInt(startYear)
+						}
+						if (endYear) {
+							data.endyear = parseInt(endYear)
+						}
+						if (note) {
+							data.note = note
+						}
+						if (ref) {
+							data.link = ref
 						}
 						//console.dir(links)
 						jHist.addSingleNode(data)
@@ -627,6 +697,7 @@
 			.line-blue{
 				border: 1px solid #0000ff;
 			}
+			
         </style>
     </head>
     <body oncontextmenu="return false;">
@@ -661,6 +732,7 @@
 
 		<!-- size control -->
 		<table id="toolbox">
+			<tr><td class="toolcell" title="JSON data"><i id="json-data" class="fa fa-database tools json fa-2x" aria-hidden="true"></i></td></tr>
 			<tr><td id="pin-node" class="toolcell low" title="pin node"><i class="fa fa-thumb-tack fa-2x" aria-hidden="true"></i></td></tr>
 			<!-- tr>
 				<td class="toolcell"><img id="zone-select" class="tools zone-select" src="/images/select40x40.png" style="width:20px; height: 20px" title="select"></img></td>
@@ -711,6 +783,22 @@
 					</td>
 				</tr>
 				<tr class="mod-node">
+					<td>在位始年:</td>
+					<td colspan=2><input id="collector-from-year-id" type="text"></td>
+				</tr>
+				<tr class="mod-node">
+					<td>在位终年:</td>
+					<td colspan=2><input id="collector-to-year-id" type="text"></td>
+				</tr>
+				<tr class="mod-node">
+					<td>备注:</td>
+					<td colspan=2><input id="collector-person-note-id" type="text"></td>
+				</tr>
+				<tr class="mod-node">
+					<td>Ref:</td>
+					<td colspan=2><input id="collector-ref-id" type="text"></td>
+				</tr>
+				<tr class="mod-node">
 					<td>帝王:</td>
 					<td><input id="collector-di-wang-id" type="checkbox"></td>
 				</tr>
@@ -757,6 +845,13 @@
 			
 		</div>
 
-		
+		{# jquery info dialog box #}
+		<!--div id="data-dialog">
+			
+		</div-->
+		<div id="data-dialog" title="Basic dialog">
+			<div id="dialog-txt">dialog text here.</div>
+		</div>
+
     </body>
 </html>
