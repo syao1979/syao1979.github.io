@@ -80,8 +80,8 @@
 			}
 			
 			function mouseDownOnNode(node, e) {
-				anode = node
-				//console.log("mouseDownOnNode "+node.id+" at (" + e.clientX +", " + e.clientY + ")")
+				//anode = node
+				console.log("mouseDownOnNode "+JSON.stringify(node.data))
 				if (pin) {
 					jHist.toggleNodePin(node.id)
 				}
@@ -89,10 +89,10 @@
 					var name = $('#collector-type').html()
 					
 					if ( name == new_data ){
-						console.log(name)
+						//console.log(name)
 						$('#collector-connect-to-id').val(node.id)
 					} else if ( name == mod_data ) {
-						console.log(name)
+						
 						$("#collector-name-id").val(node.data.id)
 						$("#collector-other-name-id").val(node.data.name)
 						$("#collector-from-year-id,#collector-to-year-id,#collector-person-note-id").val("")
@@ -104,9 +104,13 @@
 						}
 						if (node.data.note) {
 							$("#collector-person-note-id").val(node.data.note)
+						} else {
+							$("#collector-person-note-id").val('')
 						}
 						if (node.data.link) {
-							$("#collector-link-id").val(node.data.link)
+							$("#collector-ref-id").val(node.data.link)
+						} else {
+							$("#collector-ref-id").val('')
 						}
 						
 						if (node.data.gender == 'f') {
