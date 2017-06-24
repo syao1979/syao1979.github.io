@@ -261,7 +261,7 @@
 		this.VIEW_PARAM = {
 			"nodeSize" : 15,
 			"springLength" : 10,        // view layout setting
-			"springCoeff" : 0.0028,     // same
+			"springCoeff" : 0.002,     // same
 			"gravity" : -12,           // same
 			"theta" : 0.8,              // same
 			"dragCoeff" : 0.02,         // same
@@ -316,12 +316,21 @@
 			
 		},
 		addSingleNode : function(node){ this.graph.addNode(node.id, node); this.renderer.rerender() },
-		addNodes : function addNodes(nodes) {
-				for  (let n=0; n<nodes.length; n++) {
-					let node = nodes[n]
-					this.graph.addNode(node.id, node)
-				}
-			},
+		addNodes : function addNodes(nodes, applyXY) {
+			for  (let n=0; n<nodes.length; n++) {
+				let node = nodes[n]
+				this.graph.addNode(node.id, node)
+			}
+			if (applyXY) {
+				this.graph.forEachNode((node)=>{
+					let ui = this.graphics.getNodeUI(node.id)
+					if (node.data.x && node.data.y) {
+						ui.position.x = node.data.x
+						ui.position.y = node.data.y
+					}
+				})
+			}
+		},
 			
 		addSingleLink : function(data, draw){
 			var fromN = this.graph.getNode(data.from)
@@ -356,13 +365,18 @@
 			}
 		},
 		
-		toJSON : function(){
-			return {"nodes" : this.nodeJSON(), "links": this.linkJSON()}
+		toJSON : function(xy){
+			return {"nodes" : this.nodeJSON(xy), "links": this.linkJSON()}
 		},
 		
-		nodeJSON : function(){
+		nodeJSON : function(xy){
 			let nodes = []
-			this.graph.forEachNode(function(node){
+			this.graph.forEachNode((node)=>{
+				if (xy) {
+					let ui = this.graphics.getNodeUI(node.id)
+					node.data.x = Math.round(ui.position.x)
+					node.data.y = Math.round(ui.position.y)
+				}
 				nodes.push(node.data)
 			})
 			return nodes

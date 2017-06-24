@@ -254,7 +254,7 @@
 					} else if ($(this).hasClass('zoomfit')){
 						jHist.fitScreen()
 					} else if ($(this).hasClass('json')) {
-						show_dialog(JSON.stringify(jHist.toJSON()), "JSON data")
+						show_dialog(JSON.stringify(jHist.toJSON(true)), "JSON data")
 						//$( "#data-dialog" ).dialog()
 					}
 				})
@@ -574,16 +574,12 @@
 					async: true,
 					url: file,
 					success: function(response) {
-						jHist.addNodes(response.nodes)
-						
+						jHist.addNodes(response.nodes, true)
 						// pin "黄帝"
-						//jHist.pinNode("黄帝", true)
-						jHist.toggleNodePin("黄帝")
-						//let pinNode = jHist.graph.getNode("黄帝")
-						////pinNode.isPinned = true
-						//jHist.layout.pinNode(pinNode, true);
+						//jHist.toggleNodePin("黄帝")
 						jHist.addLinks(response.links)
-						//console.dir(response)
+						setTimeout(()=>(jHist.fitScreen()), 500)	//add links is async, give time to let it finish
+
 					},
 					error: function(xhr, ajaxOptions, thrownError){
 						console.dir('failed to fetch file ' + file)
