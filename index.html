@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+	
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>帝王世系</title>
@@ -574,9 +575,10 @@
 					async: true,
 					url: file,
 					success: function(response) {
-						jHist.addNodes(response.nodes, true)
+						jHist.addNodes(response.nodes, false)	// do not use coordinates
+						//jHist.addNodes(response.nodes, true)	// use coordinates
 						// pin "黄帝"
-						//jHist.toggleNodePin("黄帝")
+						jHist.toggleNodePin("黄帝")
 						jHist.addLinks(response.links)
 						setTimeout(()=>(jHist.fitScreen()), 500)	//add links is async, give time to let it finish
 
