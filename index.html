@@ -16,7 +16,17 @@
 		<script type="text/javascript" src="scripts/main.js"></script>
 
 		<link rel="stylesheet" type="text/css" href="css/font-awesome-4.7.0/css/font-awesome.min.css">
+		<script type='text/javascript'>
+			const redirect = ()=>{
+				const loc = window.location;
+				if(window.location.search !== ""){
+					window.location.href = `${loc.protocol}//${loc.host}${loc.pathname}/timeline/${window.location.search}`
+				}
+			}
+			redirect();
+		</script>
         <script type='text/javascript'>
+
 			var new_data = "New Data"
 			var mod_data = "Modify Data"
 			var mod_link = "Modify Link"
