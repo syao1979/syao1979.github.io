@@ -20,7 +20,8 @@
 			const redirect = ()=>{
 				const loc = window.location;
 				if(window.location.search !== ""){
-					window.location.href = `${loc.protocol}//${loc.host}${loc.pathname}/timeline/${window.location.search}`
+					// hack to redirect back to timeline
+					window.location.href = `https://syao1979.github.io/timeline/${window.location.search}`
 				}
 			}
 			redirect();
